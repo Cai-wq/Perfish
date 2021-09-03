@@ -10,14 +10,14 @@
         <em class="el-icon-caret-bottom" />
       </div>
       <el-dropdown-menu class="user-dropdown" slot="dropdown">
-        <router-link class="inlineBlock" to="/">
+        <el-dropdown-item>
+          <el-link :underline="false" @click="openPoseidon">海王平台</el-link>
+        </el-dropdown-item>
+        <router-link class="inlineBlock" to="/settings">
           <el-dropdown-item>
-            海王平台
+            设置
           </el-dropdown-item>
         </router-link>
-        <el-dropdown-item>
-          设置
-        </el-dropdown-item>
         <el-dropdown-item divided>
           <span style="display:block;">退出登录</span>
         </el-dropdown-item>
@@ -27,11 +27,16 @@
 </template>
 
 <script>
+  import { shell } from 'electron'
+
   export default {
     name: 'UserInfoView',
     methods: {
       userName() {
         return '蔡伟琪'
+      },
+      openPoseidon() {
+        shell.openExternal('http://poseidon.183me.com')
       }
     }
   }

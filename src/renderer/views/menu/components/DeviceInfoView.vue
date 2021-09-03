@@ -8,6 +8,9 @@
 </template>
 
 <script>
+  import { getIosDeviceInfo } from '@/utils/iosUtil'
+  import { getAndroidDeviceInfo } from '@/utils/AndroidUtil'
+
   export default {
     name: 'DeviceInfoView',
     props: {
@@ -53,28 +56,12 @@
     },
     methods: {
       getDeviceInfo(platform, deviceId) {
-        // TODO 根据udid获取设备信息
         if (!deviceId || deviceId === '') {
           console.log('请选择测试设备')
           this.deviceInfo = {}
           return
         }
-        this.deviceInfo = platform === 'Android' ? {
-          Brand: 'HUAWEI',
-          Product: 'INE-TL00',
-          OS: '9',
-          UDID: 'LSP233333333',
-          CpuABI: 'arm64-v8a',
-          CpuCoreNum: 4,
-          RAM: '4GB'
-        } : {
-          DeviceName: 'iPhone X',
-          ProductType: 'iPhone10,3',
-          OS: '11.1.1',
-          UDID: '55555555555555',
-          Cpu: 'Apple A11 Bionic',
-          CpuCoreNum: 6
-        }
+        this.deviceInfo = platform === 'Android' ? getAndroidDeviceInfo(deviceId) : getIosDeviceInfo(deviceId)
       }
     }
   }

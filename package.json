@@ -20,8 +20,8 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "electron-vue-admin",
-    "appId": "org.simulatedgreg.electron-vue",
+    "productName": "perfect-performance",
+    "appId": "fm.lizhi.testing.perfect-performance",
     "directories": {
       "output": "build"
     },
@@ -60,6 +60,7 @@
     "electron-rebuild": "^3.2.2",
     "element-ui": "2.8.2",
     "js-cookie": "^2.2.0",
+    "node-cmd": "^5.0.0",
     "normalize.css": "7.0.0",
     "nprogress": "0.2.0",
     "vue": "2.6.10",

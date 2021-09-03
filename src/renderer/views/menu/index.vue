@@ -13,32 +13,27 @@
           </el-tab-pane>
         </el-tabs>
 
-        <el-select v-model="deviceId" placeholder="请选择测试设备" style="width: 100%"  :disabled="testing">
+        <el-select v-model="deviceId" placeholder="请选择测试设备" style="width: 100%" :disabled="testing" @change="chooseDevice">
           <el-option
             v-for="item in deviceList"
-            :key="item"
-            :label="item"
-            :value="item" />
+            :key="item.udid"
+            :label="item.name"
+            :value="item.udid" />
         </el-select>
         <el-select v-model="app" placeholder="请选择测试应用" style="width: 100%" :disabled="testing">
           <el-option
               v-for="item in appList"
               :key="item.packageName"
-              :label="item.name"
-              :value="item" />
+              :label="item.version ? item.name + '(' + item.version + ')' : item.name"
+              :value="item.packageName" />
         </el-select>
 
         <el-divider />
         <device-info-view :platform="platform" :device-id="deviceId"/>
-<!--        <el-tabs v-model="tab"  type="border-card">-->
-<!--          <el-tab-pane label="Device" name="device">-->
-<!--            <device-info-view />-->
-<!--          </el-tab-pane>-->
-<!--        </el-tabs>-->
       </el-aside>
 
       <el-main>
-        <performance-page :platform="platform" :device-id="deviceId" :package-name="app" @start="onTesting" @stop="onFinish"/>
+        <performance-page :platform="platform" :device-id="deviceId" :package-name="app ? app : undefined" @start="onTesting" @stop="onFinish"/>
       </el-main>
     </el-container>
   </div>
@@ -48,6 +43,8 @@
   import UserInfoView from './components/UserInfoView'
   import DeviceInfoView from './components/DeviceInfoView'
   import PerformancePage from '@/views/performance'
+  import { getIosDevices, getIosApplications } from '@/utils/iosUtil'
+  import { getAndroidDevices, getAndroidApplications } from '@/utils/AndroidUtil'
 
   export default {
     name: 'MainMenu',
@@ -58,7 +55,7 @@
     },
     data() {
       return {
-        platform: 'Android',
+        platform: 'iOS',
         deviceId: undefined,
         device: null,
         app: undefined,
@@ -80,17 +77,23 @@
         this.device = null
         this.app = undefined
       },
+      chooseDevice() {
+        this.app = null
+      },
       getIosDeviceList() {
-        return ['55555555555']
+        return getIosDevices()
       },
       getAndroidDeviceList() {
-        return ['LSP23333333']
+        return getAndroidDevices()
       },
       getIosAppList(deviceId) {
-        return ['com.lizhi.lizhifm']
+        if (!deviceId || deviceId === '') {
+          return []
+        }
+        return getIosApplications(deviceId)
       },
       getAndroidAppList(deviceId) {
-        return ['com.yibasan.lizhifm']
+        return getAndroidApplications(deviceId)
       },
       onTesting(val) {
         this.testing = val === true || val === 'true' || val === 1
