@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 style="float: left">移动端性能测试</h2>
+    <h3 style="float: left">移动端性能测试</h3>
     <div style="float: right; cursor: pointer;">
       <svg v-if="!running" class="svg-logo" aria-hidden="true" v-on="$listeners" @click="startTest">
         <use :xlink:href="`#icon-play`" />
@@ -235,9 +235,11 @@
 
 <style lang="scss" scoped>
   .svg-logo {
-    width: 4em;
-    height: 4em;
-    padding: 5px 5px;
+    width: 48px;
+    height: 48px;
+    padding: 3px 3px;
+    margin-top: 5px;
+    margin-right: 7px;
     /*float: left;*/
     /*padding-right: 1em;*/
     /*vertical-align: -0.15em;*/
@@ -248,7 +250,7 @@
   .perf-chart-view {
     display: flex;
     width: 100%;
-    margin-bottom: 10px;
+    /*margin-bottom: 10px;*/
 
     .title {
       margin: auto;

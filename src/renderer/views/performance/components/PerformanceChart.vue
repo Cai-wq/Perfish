@@ -26,7 +26,7 @@
       chartData: {
         deep: true,
         handler(val) {
-          console.error('XXXXXXXX=' + JSON.stringify(val))
+          // console.error('收到图表数据=' + JSON.stringify(val))
           if (val.detail && Object.keys(val.detail).length !== 0) {
             this.setOptions(val)
           }
@@ -65,9 +65,10 @@
         })
         const seriesData = []
         const legendData = []
+        const unitData = {}
         Object.keys(chartData.detail).forEach((key) => {
           const currentData = {}
-          currentData.name = key + '(' + chartData.detail[key].unit + ')'
+          currentData.name = key
           legendData.push(currentData.name)
           currentData.type = 'line'
           currentData.symbol = 'none' // 去掉折角处的点
@@ -76,6 +77,7 @@
             return [item.time, item.value]
           })
           seriesData.push(currentData)
+          unitData[key] = chartData.detail[key].unit
         })
 
         const data = {
@@ -86,23 +88,26 @@
               // 显示 x 轴时间的值
               labelText += this.formatTime(params[0].data[0])
               // 可能有不止一个系列，所以要遍历一下
-              params.forEach((param) => {
+              params.forEach((param, index) => {
                 const dataTime = param.data[1]
-                labelText += '<br><strong>' + param.marker + param.seriesName + '</strong>: ' +
-                  (Math.round(dataTime) === dataTime ? dataTime : dataTime.toFixed(2))
+                labelText += '<br><strong style="float: left">' + param.marker + param.seriesName + '</strong>:&nbsp;&nbsp;' +
+                  '<span style="float: right">' + (Math.round(dataTime) === dataTime ? dataTime : dataTime.toFixed(2)) + unitData[param.seriesName] + '</span>'
               })
               return labelText
             }
           },
 
           legend: {
-            data: legendData
+            data: legendData,
+            orient: 'vertical', // 垂直显示
+            y: 'center', // 延Y轴居中
+            x: 'right' // 居右显示
           },
           grid: {
-            left: '0',
-            bottom: '3%',
-            right: '2%',
-            containLabel: true
+            left: '30',
+            bottom: '15%',
+            right: '130',
+            top: '10'
           },
           dataZoom: [{
             type: 'slider',
