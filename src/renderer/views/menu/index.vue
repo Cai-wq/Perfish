@@ -99,6 +99,7 @@
         this.testing = val === true || val === 'true' || val === 1
       },
       onFinish(data) {
+        this.testing = false
         // TODO 测试完成弹出上传报告弹窗
         console.log('收集到性能数据类型:' + Object.keys(data))
       }

@@ -23,3 +23,5 @@ tests/**/coverage/
 *.ntvs*
 *.njsproj
 *.sln
+
+instrumentsCaller_logs/

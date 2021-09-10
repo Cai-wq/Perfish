@@ -140,6 +140,16 @@
           console.error('RPC rpcClient error:', error)
         })
 
+        // 启动性能数据采集
+        this.rpcClient.invoke('start_test', this.deviceId, this.packageName, function(error, res) {
+          if (error) {
+            console.error('启动性能数据采集失败, error=' + error)
+            return
+          }
+          console.log('start log===========\n\n\n' + res)
+        })
+
+        // 定时每秒dump一次数据
         this.timer = setInterval(() => {
           console.log('延迟执行')
           this.rpcClient.invoke('dump', (error, res) => {
@@ -186,15 +196,28 @@
         }, 1000)
       },
       stopTest() {
-        console.log('关闭')
-        this.setRunning(false)
+        console.log('测试结束')
         clearInterval(this.timer)
         this.timer = null
-        this.$emit('start', { CPU: this.cpuData, FPS: this.fpsData, Memory: this.memoryData })
+        if (!this.rpcClient.closed()) {
+          // 停止性能数据采集
+          this.rpcClient.invoke('stop_test', function(error, res) {
+            if (error) {
+              console.error('停止性能数据采集失败, error=' + error)
+              return
+            }
+          })
+          this.rpcClient.close()
+        }
+        this.setRunning(false)
       },
       setRunning(val) {
         this.running = val
-        this.$emit('start', val)
+        if (val) {
+          this.$emit('start', val)
+        } else {
+          this.$emit('stop', { CPU: this.cpuData, FPS: this.fpsData, Memory: this.memoryData })
+        }
       },
       resetDataMap() {
         this.cpuData = {
