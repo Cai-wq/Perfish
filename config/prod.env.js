@@ -1,4 +1,7 @@
 module.exports = {
   NODE_ENV: '"production"',
-  BASE_API: '"https://easy-mock.com/mock/5950a2419adc231f356a6636/vue-admin"'
+  // 基础服务
+  POSEIDON_SERVER: '"http://poseidon.183me.com"',
+  // 单点服务
+  SSO_SERVER: '"https://lzsso.lizhi.fm"'
 }
