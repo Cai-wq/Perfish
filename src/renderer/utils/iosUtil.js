@@ -19,7 +19,7 @@ export function getIosDevices() {
   const deviceList = []
   const result = cmd.runSync('tidevice list')
   const { err, data } = result
-  console.log('执行命令, data=' + data + '\nerr=' + err)
+  // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
     console.error('获取iOS设备列表失败, err=' + err)
   } else {
@@ -46,7 +46,7 @@ export function getIosApplications(deviceId) {
   }
   const result = cmd.runSync('tidevice --udid ' + deviceId + ' applist')
   const { err, data } = result
-  console.log('执行命令, data=' + data + '\nerr=' + err)
+  // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
     console.error('获取应用列表失败, err=' + err)
   } else {
@@ -77,7 +77,7 @@ export function getIosDeviceInfo(deviceId) {
   }
   const result = cmd.runSync('tidevice --udid ' + deviceId + ' info')
   const { err, data } = result
-  console.log('执行命令, data=' + data + '\nerr=' + err)
+  // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
     console.error('获取iOS设备详细信息失败, err=' + err)
   } else {

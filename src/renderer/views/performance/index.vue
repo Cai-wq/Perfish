@@ -39,8 +39,7 @@
 
 <script>
   import PerformanceChart from './components/PerformanceChart'
-  import zerorpc from 'zerorpc'
-  // import path from 'path'
+  import { PerformanceManager } from './service/PerformanceManager'
 
   const ANDROID_PORT = 14242
   const IOS_PORT = 24242
@@ -74,8 +73,6 @@
     },
     data() {
       return {
-        pythonProcess: null,
-        rpcClient: null,
         running: false,
         timer: null,
         cpuData: {},
@@ -90,37 +87,13 @@
     },
     mounted() {
       console.log('---进入界面' + process.versions.modules)
-      this.rpcClient = new zerorpc.Client()
-      // this.createPyProc()
+      PerformanceManager[this.platform].init()
     },
     beforeDestroy() {
       this.stopTest()
-      // this.exitPyProc()
+      PerformanceManager.clear()
     },
     methods: {
-      createPyProc() {
-        console.log('creating python server...')
-        const port = '4242'
-        // if (NODE_ENV === 'development') {
-        //   let script = path.join(__dirname, 'py', 'InstrumentsServer.py')
-        //   let pypath = path.join(__dirname, 'py', '.env', 'scripts', 'python.exe')
-        //   pythonProcess = require('child_process').spawn(pypath, [script, port])
-        // } else {
-        //   let exePath = path.join(__dirname, 'pydist', 'InstrumentsServer')
-        const exePath = '/Users/cai/Code/性能/perfect-performance/pydist/InstrumentsServer'
-        console.log('py文件=' + exePath)
-        this.pythonProcess = require('child_process').execFile(exePath, [port])
-        // pythonProcess = require('child_process').execSync('python3 py/InstrumentsServer', [port])
-        // }
-        if (this.pythonProcess != null) {
-          console.log('child process success')
-        }
-      },
-      exitPyProc() {
-        this.rpcClient.close()
-        this.pythonProcess.kill()
-        this.pythonProcess = null
-      },
       startTest() {
         this.resetDataMap()
         if (!this.deviceId || this.deviceId === '') {
@@ -135,28 +108,15 @@
         }
         console.log('开始性能采集! deviceId=' + this.deviceId + ', packageName=' + this.packageName)
         this.setRunning(true)
-        this.rpcClient.connect('tcp://127.0.0.1:' + this.serverPort)
-        this.rpcClient.on('error', function(error) {
-          console.error('RPC rpcClient error:', error)
-        })
 
         // 启动性能数据采集
-        this.rpcClient.invoke('start_test', this.deviceId, this.packageName, function(error, res) {
-          if (error) {
-            console.error('启动性能数据采集失败, error=' + error)
-            return
-          }
-          console.log('start log===========\n\n\n' + res)
-        })
-
-        // 定时每秒dump一次数据
-        this.timer = setInterval(() => {
-          console.log('延迟执行')
-          this.rpcClient.invoke('dump', (error, res) => {
-            if (error) {
-              console.error(error)
-            } else {
-              // console.log('返回啦===' + JSON.stringify(res));
+        PerformanceManager[this.platform].start(this.deviceId, this.packageName).then(() => {
+          console.error('start返回成功')
+          // 定时每秒dump一次数据
+          this.timer = setInterval(() => {
+            console.log('延迟执行')
+            PerformanceManager[this.platform].dump().then(res => {
+              // console.log('返回啦===' + JSON.stringify(res))
               Object.keys(res.CPU.detail).forEach((key) => {
                 if (!this.cpuData.detail.hasOwnProperty(key)) {
                   this.cpuData.detail[key] = {
@@ -191,25 +151,17 @@
                 this.memoryData.detail[key].data.push(item.data)
               })
               // console.log('ChartData.CPU====' + JSON.stringify(this.cpuData));
-            }
-          })
-        }, 1000)
+            })
+          }, 1000)
+        })
       },
       stopTest() {
         console.log('测试结束')
         clearInterval(this.timer)
         this.timer = null
-        if (!this.rpcClient.closed()) {
-          // 停止性能数据采集
-          this.rpcClient.invoke('stop_test', function(error, res) {
-            if (error) {
-              console.error('停止性能数据采集失败, error=' + error)
-              return
-            }
-          })
-          this.rpcClient.close()
-        }
-        this.setRunning(false)
+        PerformanceManager[this.platform].stop().then(() => {
+          this.setRunning(false)
+        })
       },
       setRunning(val) {
         this.running = val

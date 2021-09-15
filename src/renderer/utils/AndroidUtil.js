@@ -19,7 +19,7 @@ export function getAndroidDevices() {
   const deviceList = []
   const result = cmd.runSync('adb devices -l')
   const { err, data } = result
-  console.log('执行命令, data=' + data + '\nerr=' + err)
+  // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
     console.error('获取Android设备列表失败, err=' + err)
   } else {
@@ -46,7 +46,7 @@ export function getAndroidDeviceName(deviceId) {
   }
   const result = cmd.runSync('adb -s ' + deviceId + ' shell getprop ro.product.device')
   const { err, data } = result
-  console.log('执行命令, data=' + data + '\nerr=' + err)
+  // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
     console.error('获取Android设备列表失败, err=' + err)
     return ''
