@@ -28,37 +28,23 @@ export const constantRouterMap = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
-    name: 'Dashboard',
+    redirect: '/home',
+    name: 'HomePage',
     hidden: true,
     children: [{
-      path: 'dashboard',
-      component: () => import('@/views/dashboard/index')
+      path: 'home',
+      component: () => import('@/views/home/index')
     }]
   },
 
   {
-    path: '/menu',
+    path: '/settings',
     component: Layout,
     children: [
       {
         path: 'index',
-        name: 'MainMenu',
-        component: () => import('@/views/menu/index'),
-        meta: { title: 'MainMenu', icon: 'example' }
-      }
-    ]
-  },
-
-  {
-    path: '/performance',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'PerformancePage',
-        component: () => import('@/views/performance/index'),
-        meta: { title: 'PerformancePage', icon: 'form' }
+        name: 'SettingsPage',
+        component: () => import('@/views/settings/index')
       }
     ]
   },

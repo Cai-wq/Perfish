@@ -1,6 +1,6 @@
 import { getUserInfo } from '@/api/user'
 import { getToken, setToken, removeToken, setUserName } from '@/utils/auth'
-import { resetRouter } from '@/router'
+// import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
   return {
@@ -60,7 +60,6 @@ const actions = {
         }
 
         const { name, account, email } = data
-
         commit('SET_NAME', name)
         commit('SET_ACCOUNT', account)
         commit('SET_EMAIL', email)
@@ -76,7 +75,7 @@ const actions = {
   // user logout
   ssoLogout({ commit }) {
     removeToken()
-    resetRouter()
+    // resetRouter()
     commit('RESET_STATE')
   },
 

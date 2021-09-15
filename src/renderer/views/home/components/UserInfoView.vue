@@ -4,7 +4,7 @@
       <div class="avatar-wrapper">
         <p class="user-name">
           <template>
-            {{ userName() }}
+            {{ userName }}
           </template>
         </p>
         <em class="el-icon-caret-bottom" />
@@ -18,7 +18,7 @@
             设置
           </el-dropdown-item>
         </router-link>
-        <el-dropdown-item divided>
+        <el-dropdown-item divided @click.native="logout">
           <span style="display:block;">退出登录</span>
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -31,12 +31,19 @@
 
   export default {
     name: 'UserInfoView',
-    methods: {
+    computed: {
       userName() {
-        return '蔡伟琪'
-      },
+        return this.$store.getters.userInfo.name
+      }
+    },
+    methods: {
       openPoseidon() {
         shell.openExternal('http://poseidon.183me.com')
+      },
+      async logout() {
+        await this.$store.dispatch('user/ssoLogout')
+        const backUrl = escape(window.location.href)
+        window.location.href = process.env.APP_SSO_SERVER + '/logout?backUrl=' + backUrl
       }
     }
   }

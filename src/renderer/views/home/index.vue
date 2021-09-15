@@ -47,7 +47,7 @@
   import { getAndroidDevices, getAndroidApplications } from '@/utils/AndroidUtil'
 
   export default {
-    name: 'MainMenu',
+    name: 'HomePage',
     components: {
       UserInfoView,
       DeviceInfoView,
