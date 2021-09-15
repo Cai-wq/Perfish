@@ -25,3 +25,8 @@ new Vue({
   store,
   template: '<App/>'
 }).$mount('#app')
+
+// 日志
+const logger = require('electron-log')
+logger.transports.console.level = 'silly'
+Object.assign(console, logger.functions)
