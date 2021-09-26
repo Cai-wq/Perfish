@@ -1,5 +1,9 @@
 <template>
-  <div>
+  <div
+      v-loading="initializing"
+      element-loading-text="环境准备中"
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.5)">
     <h3 style="float: left">移动端性能测试</h3>
     <div style="float: right; cursor: pointer;">
       <svg v-if="!running" class="svg-logo" aria-hidden="true" v-on="$listeners" @click="startTest">
@@ -41,14 +45,19 @@
   import PerformanceChart from './components/PerformanceChart'
   import { PerformanceManager } from './service/PerformanceManager'
 
-  const ANDROID_PORT = 14242
-  const IOS_PORT = 24242
   export default {
     name: 'PerformancePage',
     components: {
       PerformanceChart
     },
     props: {
+      initializing: {
+        type: Boolean,
+        required: true,
+        default: function() {
+          return true
+        }
+      },
       platform: {
         type: String,
         required: true,
@@ -75,23 +84,15 @@
       return {
         running: false,
         timer: null,
+        startTime: null,
+        endTime: null,
         cpuData: {},
         memoryData: {},
         fpsData: {}
       }
     },
-    computed: {
-      serverPort() {
-        return this.platform === 'Android' ? ANDROID_PORT : IOS_PORT
-      }
-    },
-    mounted() {
-      console.log('---进入界面' + process.versions.modules)
-      PerformanceManager[this.platform].init()
-    },
     beforeDestroy() {
       this.stopTest()
-      PerformanceManager.clear()
     },
     methods: {
       startTest() {
@@ -112,9 +113,10 @@
         // 启动性能数据采集
         PerformanceManager[this.platform].start(this.deviceId, this.packageName).then(() => {
           console.error('start返回成功')
+          this.startTime = new Date().getTime()
           // 定时每秒dump一次数据
           this.timer = setInterval(() => {
-            console.log('延迟执行')
+            // console.log('定时每秒dump一次数据')
             PerformanceManager[this.platform].dump().then(res => {
               // console.log('返回啦===' + JSON.stringify(res))
               Object.keys(res.CPU.detail).forEach((key) => {
@@ -150,13 +152,13 @@
                 this.memoryData.detail[key].unit = item.unit
                 this.memoryData.detail[key].data.push(item.data)
               })
-              // console.log('ChartData.CPU====' + JSON.stringify(this.cpuData));
             })
           }, 1000)
         })
       },
       stopTest() {
         console.log('测试结束')
+        this.endTime = new Date().getTime()
         clearInterval(this.timer)
         this.timer = null
         PerformanceManager[this.platform].stop().then(() => {
@@ -168,7 +170,9 @@
         if (val) {
           this.$emit('start', val)
         } else {
-          this.$emit('stop', { CPU: this.cpuData, FPS: this.fpsData, Memory: this.memoryData })
+          this.$emit('stop', { CPU: this.cpuData, FPS: this.fpsData, Memory: this.memoryData }, this.startTime, this.endTime)
+          this.startTime = null
+          this.endTime = null
         }
       },
       resetDataMap() {

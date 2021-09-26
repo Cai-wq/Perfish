@@ -13,28 +13,38 @@
           </el-tab-pane>
         </el-tabs>
 
-        <el-select v-model="deviceId" placeholder="请选择测试设备" style="width: 100%" :disabled="testing" @change="chooseDevice">
+        <el-select v-model="device" value-key="udid" placeholder="请选择测试设备" style="width: 100%" :disabled="testing" @change="chooseDevice">
           <el-option
             v-for="item in deviceList"
             :key="item.udid"
             :label="item.name"
-            :value="item.udid" />
+            :value="item">
+            <span><strong>{{ item.name }}</strong> ({{ item.udid }})</span>
+          </el-option>
         </el-select>
-        <el-select v-model="app" placeholder="请选择测试应用" style="width: 100%" :disabled="testing">
+        <el-select v-model="app" value-key="packageName" placeholder="请选择测试应用" style="width: 100%" :disabled="testing">
           <el-option
               v-for="item in appList"
               :key="item.packageName"
-              :label="item.version ? item.name + '(' + item.version + ')' : item.name"
-              :value="item.packageName" />
+              :label="item.name"
+              :value="item">
+            <span><strong>{{ item.name }}</strong></span>
+            <span v-if="item.name !== item.packageName"> ({{ item.packageName }})</span>
+          </el-option>
         </el-select>
 
         <el-divider />
-        <device-info-view :platform="platform" :device-id="deviceId"/>
+        <device-info-view ref="deviceInfoView" :platform="platform" :device-id="device ? device.udid : undefined" @update="updateDeviceInfo"/>
       </el-aside>
 
       <el-main>
-        <performance-page :platform="platform" :device-id="deviceId" :package-name="app ? app : undefined" @start="onTesting" @stop="onFinish"/>
+        <performance-page :platform="platform" :device-id="device ? device.udid : undefined"
+                          :package-name="app ? app.packageName : undefined" :initializing="initializing"
+                          @start="onTesting" @stop="onFinish"/>
       </el-main>
+
+      <upload-view :platform="platform" :device-info="deviceInfo" :package-info="app ? app : undefined" :performance-data="performanceData"
+                   :show="showUploadDialog" @success="showUploadDialog = false"/>
     </el-container>
   </div>
 </template>
@@ -42,25 +52,35 @@
 <script>
   import UserInfoView from './components/UserInfoView'
   import DeviceInfoView from './components/DeviceInfoView'
+  import UploadView from './components/UploadView'
   import PerformancePage from '@/views/performance'
   import { getIosDevices, getIosApplications } from '@/utils/iosUtil'
   import { getAndroidDevices, getAndroidApplications } from '@/utils/AndroidUtil'
+  import { PerformanceManager } from '@/views/performance/service/PerformanceManager'
 
   export default {
     name: 'HomePage',
     components: {
       UserInfoView,
       DeviceInfoView,
+      UploadView,
       PerformancePage
     },
     data() {
       return {
         platform: 'iOS',
-        deviceId: undefined,
-        device: null,
+        device: {
+          udid: undefined,
+          name: undefined
+        },
+        deviceInfo: {},
         app: undefined,
-        tab: 'device',
-        testing: false
+        initializing: true,
+        performanceData: {
+          data: {}
+        },
+        testing: false,
+        showUploadDialog: false
       }
     },
     computed: {
@@ -68,14 +88,33 @@
         return this.platform === 'Android' ? this.getAndroidDeviceList() : this.getIosDeviceList()
       },
       appList() {
-        return this.platform === 'Android' ? this.getAndroidAppList(this.deviceId) : this.getIosAppList(this.deviceId)
+        if (!this.device || !this.device.udid) {
+          return []
+        }
+        return this.platform === 'Android' ? this.getAndroidAppList(this.device.udid) : this.getIosAppList(this.device.udid)
       }
+    },
+    mounted() {
+      this.initPerformanceService()
+    },
+    beforeDestroy() {
+      PerformanceManager.clear()
     },
     methods: {
       switchPlatform() {
-        this.deviceId = undefined
-        this.device = null
+        this.device = undefined
         this.app = undefined
+        this.showUploadDialog = false
+        this.initializing = true
+        this.initPerformanceService()
+      },
+      initPerformanceService() {
+        PerformanceManager[this.platform].init().then(() => {
+          this.initializing = false
+        }).catch(err => {
+          console.error('初始化' + this.platform + '性能服务失败, error=', err)
+          this.initializing = true
+        })
       },
       chooseDevice() {
         this.app = null
@@ -86,6 +125,9 @@
       getAndroidDeviceList() {
         return getAndroidDevices()
       },
+      updateDeviceInfo(val) {
+        this.deviceInfo = val
+      },
       getIosAppList(deviceId) {
         if (!deviceId || deviceId === '') {
           return []
@@ -93,15 +135,23 @@
         return getIosApplications(deviceId)
       },
       getAndroidAppList(deviceId) {
+        if (!deviceId || deviceId === '') {
+          return []
+        }
         return getAndroidApplications(deviceId)
       },
       onTesting(val) {
         this.testing = val === true || val === 'true' || val === 1
       },
-      onFinish(data) {
+      onFinish(data, startTime, endTime) {
         this.testing = false
-        // TODO 测试完成弹出上传报告弹窗
         console.log('收集到性能数据类型:' + Object.keys(data))
+        this.performanceData = {
+          data: data,
+          startTime: startTime,
+          endTime: endTime
+        }
+        this.showUploadDialog = true
       }
     }
   }

@@ -62,6 +62,7 @@
           return
         }
         this.deviceInfo = platform === 'Android' ? getAndroidDeviceInfo(deviceId) : getIosDeviceInfo(deviceId)
+        this.$emit('update', this.deviceInfo)
       }
     }
   }

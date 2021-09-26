@@ -5,20 +5,8 @@ import * as iOS from './iOSService'
 import * as Android from './AndroidService'
 
 export const PerformanceManager = {
-  iOS: {
-    init: iOS.init,
-    start: iOS.start,
-    stop: iOS.stop,
-    dump: iOS.dump,
-    kill: iOS.kill
-  },
-  Android: {
-    init: Android.init,
-    start: Android.start,
-    stop: Android.stop,
-    dump: Android.dump,
-    kill: Android.kill
-  },
+  iOS: iOS,
+  Android: Android,
   clear: function() {
     try {
       iOS.kill()

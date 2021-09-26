@@ -87,7 +87,7 @@ export function getIosDeviceInfo(deviceId) {
       } else if (item.startsWith('MarketName')) {
         deviceInfo.MarketName = item.replace('MarketName:', '').trim()
       } else if (item.startsWith('ProductVersion')) {
-        deviceInfo.ProductVersion = item.replace('ProductVersion:', '').trim()
+        deviceInfo.OSVersion = item.replace('ProductVersion:', '').trim()
       } else if (item.startsWith('ProductType')) {
         deviceInfo.ProductType = item.replace('ProductType:', '').trim()
       } else if (item.startsWith('WiFiAddress')) {

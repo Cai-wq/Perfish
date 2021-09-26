@@ -110,7 +110,7 @@ export function getAndroidDeviceInfo(deviceId) {
       } else if (item.startsWith('[ro.build.version.sdk]')) {
         systemInfo.VersionSDK = item.replace('[ro.build.version.sdk]: [', '').replace(']', '').trim()
       } else if (item.startsWith('[ro.build.version.release]')) {
-        systemInfo.VersionSDK = item.replace('[ro.build.version.release]: [', '').replace(']', '').trim()
+        systemInfo.OSVersion = item.replace('[ro.build.version.release]: [', '').replace(']', '').trim()
       } else if (item.startsWith('[ro.product.cpu.abi]')) {
         systemInfo.CPUArchitecture = item.replace('[ro.product.cpu.abi]: [', '').replace(']', '').trim()
       }

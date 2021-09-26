@@ -1,17 +1,23 @@
 /**
+ * Android性能采集服务
  * Created by CaiWeiQi on 2021/9/10
  */
 import zerorpc from 'zerorpc'
 import child_process from 'child_process'
 import path from 'path'
+import cmd from 'node-cmd'
+import { StateEnum } from './constant'
+
 import log from 'electron-log'
 const logger = log.create('AdbPerfServerLog')
 logger.transports.file.fileName = 'AdbPerfServer.log'
-logger.transports.console.level = 'silly'
+logger.transports.console.level = process.env.NODE_ENV === 'development'
+  ? 'silly' : false
 
 const serverPort = 14242
 let pythonProcess = null
 let rpcClient = null
+export let serverState = StateEnum.STATE_STOP
 const registerMonitorList = []
 
 function execFilePath() {
@@ -26,23 +32,31 @@ function outputPath() {
   return path.join('~/Library', 'Lizhi', 'Perfect', 'AdbPerfServer')
 }
 
+/**
+ * 启动性能测试服务
+ */
 export function init() {
+  if (pythonProcess != null) {
+    logger.info('InstrumentsCaller服务已启动')
+    rpcConnect()
+    return
+  }
   new Promise((resolve, reject) => {
     pythonProcess = child_process.execFile(execFilePath(),
       ['--port', serverPort,
         '--config', configFilePath()])
     logger.info(`子进程pid=${pythonProcess.pid}`)
-    pythonProcess.stdout.on(
-      'data',
-      (chunk) => {
-        logger.info('服务日志stdout===')
-        logger.info(chunk.toString())
-      }
-    )
+    // pythonProcess.stdout.on(
+    //   'data',
+    //   (chunk) => {
+    //     logger.info('服务日志stdout===')
+    //     logger.info(chunk.toString())
+    //   }
+    // )
     pythonProcess.stderr.on(
       'data',
       (chunk) => {
-        logger.info('服务日志stderr===')
+        // logger.info('服务日志stderr===')
         logger.info(chunk.toString())
         if (chunk.toString().indexOf(
           'start running on tcp://127.0.0.1:' + serverPort) !== -1) {
@@ -53,14 +67,28 @@ export function init() {
     )
   }).then(() => {
     logger.info('[AdbPerfServer]-RPC服务已启动')
-    rpcClient = new zerorpc.Client()
-    rpcClient.connect('tcp://127.0.0.1:' + serverPort)
+    serverState = StateEnum.STATE_INITIALIZED
+    rpcConnect()
   })
   if (pythonProcess == null) {
     throw new Error('启动AdbPerfServer失败')
   }
 }
 
+/**
+ * rpc客户端连接
+ */
+function rpcConnect() {
+  rpcClient = new zerorpc.Client()
+  rpcClient.connect('tcp://127.0.0.1:' + serverPort)
+}
+
+/**
+ * 开始性能数据采集
+ * @param deviceId 设备UDID
+ * @param bundleId 测试包名
+ * @returns {Promise<unknown>}
+ */
 export function start(deviceId, bundleId) {
   return new Promise((resolve, reject) => {
     rpcClient.invoke('start_test', deviceId, bundleId, outputPath(),
@@ -69,6 +97,7 @@ export function start(deviceId, bundleId) {
           reject('启动性能数据采集失败, error=' + error)
         }
         logger.info('start log===========\n\n\n' + res)
+        serverState = StateEnum.STATE_RUNNING
         res.split(',').forEach((item) => {
           registerMonitorList.push(item)
         })
@@ -77,6 +106,10 @@ export function start(deviceId, bundleId) {
   })
 }
 
+/**
+ * 停止性能数据采集
+ * @returns {Promise<unknown>}
+ */
 export function stop() {
   return new Promise((resolve, reject) => {
     rpcClient.invoke('stop_test',
@@ -85,11 +118,16 @@ export function stop() {
           reject('停止性能数据采集失败, error=' + error)
         }
         logger.info('stop log===========\n\n\n' + res)
+        serverState = StateEnum.STATE_STOP
         resolve(res)
       })
   })
 }
 
+/**
+ * 获取最近一秒性能数据
+ * @returns {Promise<unknown>}
+ */
 export function dump() {
   return new Promise((resolve, reject) => {
     rpcClient.invoke('dump', (error, res) => {
@@ -101,13 +139,18 @@ export function dump() {
   })
 }
 
+/**
+ * 关闭性能测试服务
+ */
 export function kill() {
   if (rpcClient != null) {
     rpcClient.close()
     rpcClient = null
   }
   if (pythonProcess != null) {
-    pythonProcess.kill()
+    pythonProcess.kill('SIGTERM')
+    pythonProcess.kill(9)
+    cmd.runSync('ps aux | grep InstrumentsServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
     pythonProcess = null
   }
 }

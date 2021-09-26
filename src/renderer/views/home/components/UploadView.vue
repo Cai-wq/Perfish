@@ -1,0 +1,168 @@
+<template>
+  <el-dialog
+      title="上传至海王平台"
+      :visible.sync="show"
+      @opened="afterOpen"
+      @close="beforeClose">
+    <div class="app-container">
+      <el-form ref="uploadForm" :model="uploadForm" :rules="formRules" label-width="80px" label-position="left">
+        <el-form-item label="平台" prop="platform">
+          <el-radio-group v-model="platform">
+            <el-radio-button label="Android" :disabled="platform !== 'Android'"></el-radio-button>
+            <el-radio-button label="iOS" :disabled="platform !== 'iOS'"></el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="设备ID" prop="deviceId">
+          <el-input v-model="deviceInfo.UDID" disabled />
+        </el-form-item>
+        <el-form-item label="测试APP" prop="packageName">
+          <el-input v-model="packageInfo.packageName" disabled />
+        </el-form-item>
+        <el-form-item label="性能数据" prop="classify">
+          <el-checkbox-group v-model="uploadForm.classify" :min="3" :max="3">
+            <el-checkbox
+                v-for="item in performanceData.data ? Object.keys(performanceData.data) : {}"
+                :label="item"
+                :key="item" />
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="标题" prop="title">
+          <el-input maxlength="200" show-word-limit v-model="uploadForm.title" />
+        </el-form-item>
+        <el-form-item label="备注" prop="description">
+          <el-input type="textarea" maxlength="255" show-word-limit :autosize="{ minRows: 3, maxRows: 6}" v-model="uploadForm.description" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitUpload">立即上传</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+  </el-dialog>
+</template>
+
+<script>
+  import { uploadPerformanceInfo } from '@/api/poseidon'
+
+  export default {
+    name: 'UploadView',
+    props: {
+      show: {
+        type: Boolean,
+        required: true,
+        default: function() {
+          return false
+        }
+      },
+      platform: {
+        type: String,
+        required: true
+      },
+      performanceData: {
+        type: Object,
+        required: true,
+        default: function() {
+          return {}
+        }
+      },
+      deviceInfo: {
+        type: Object,
+        required: true,
+        default: function() {
+          return {
+            name: null,
+            udid: null
+          }
+        }
+      },
+      packageInfo: {
+        type: Object,
+        required: true,
+        default: function() {
+          return {
+            name: null,
+            packageName: null,
+            version: null
+          }
+        }
+      }
+    },
+    data() {
+      return {
+        showUploadDialog: false,
+        uploadForm: {
+          classify: [],
+          title: null,
+          description: null
+        },
+        formRules: {
+          title: [
+            { required: true, message: '请输入报告标题', trigger: 'blur' },
+            { min: 3, max: 200, message: '标题长度不能超过200字符', trigger: 'blur' }
+          ],
+          description: [
+            { max: 255, message: '备注长度不能超过255字符', trigger: 'blur' }
+          ]
+        }
+      }
+    },
+    watch: {
+      performanceData: {
+        handler(val) {
+          this.uploadForm.classify = Object.keys(val.data)
+          console.log('收集到性能数据分类：', this.uploadForm.classify)
+        }
+      }
+    },
+    methods: {
+      submitUpload() {
+        const data = {
+          platform: this.platform,
+          title: this.uploadForm.title,
+          description: this.uploadForm.description,
+          deviceId: this.deviceInfo.udid,
+          deviceInfo: {
+            devicePlatform: this.platform.toLowerCase(),
+            deviceName: this.deviceInfo.DeviceName,
+            udid: this.deviceInfo.UDID,
+            osVersion: this.deviceInfo.OSVersion
+          },
+          packageName: this.packageInfo.packageName,
+          packageInfo: this.packageInfo,
+          performanceData: this.performanceData.data,
+          author: this.$store.getters.userInfo.name,
+          startTime: this.performanceData.startTime,
+          endTime: this.performanceData.endTime
+        }
+        this.$refs.uploadForm.validate((valid) => {
+          if (valid) {
+            uploadPerformanceInfo(data).then(res => {
+              if (res.code === 200) {
+                this.$message.success('上传成功')
+                this.$emit('success')
+              }
+            }).catch(e => {
+              this.$message.error('上传失败, error=' + e)
+            })
+          } else {
+            return false
+          }
+        })
+      },
+      afterOpen() {
+        if (this.performanceData && this.performanceData.data) {
+          this.uploadForm.classify = Object.keys(this.performanceData.data)
+        }
+      },
+      beforeClose() {
+        this.uploadForm = {
+          title: undefined,
+          description: undefined
+        }
+      }
+    }
+  }
+</script>
+
+<style scoped>
+
+</style>
