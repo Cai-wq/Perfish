@@ -6,8 +6,8 @@
   "license": "MIT",
   "main": "./dist/electron/main.js",
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder",
-    "build:dir": "node .electron-vue/build.js && electron-builder --dir",
+    "build": "export CSC_IDENTITY_AUTO_DISCOVERY=false && node .electron-vue/build.js && electron-builder",
+    "build:dir": "export CSC_IDENTITY_AUTO_DISCOVERY=false && node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "rebuild": "./node_modules/.bin/electron-rebuild && npm install",
@@ -28,6 +28,7 @@
     "files": [
       "dist/electron/**/*"
     ],
+    "asar": false,
     "dmg": {
       "contents": [
         {
@@ -56,10 +57,9 @@
   "dependencies": {
     "axios": "0.18.1",
     "echarts": "4.2.1",
-    "electron": "6.0.0",
     "electron-log": "^4.4.1",
-    "electron-rebuild": "^3.2.2",
     "element-ui": "2.8.2",
+    "fix-path": "^4.0.0",
     "js-cookie": "^2.2.0",
     "node-cmd": "^5.0.0",
     "normalize.css": "7.0.0",
@@ -86,9 +86,12 @@
     "css-loader": "^0.28.4",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron-builder": "^19.19.1",
+    "electron": "6.0.0",
+    "electron-builder": "21.2.0",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
+    "electron-log": "^4.4.1",
+    "electron-rebuild": "^3.2.2",
     "eslint": "^4.4.1",
     "eslint-friendly-formatter": "^3.0.0",
     "eslint-loader": "^1.9.0",

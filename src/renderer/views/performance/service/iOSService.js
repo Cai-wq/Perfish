@@ -5,13 +5,16 @@
 import zerorpc from 'zerorpc'
 import child_process from 'child_process'
 import path from 'path'
+import fs from 'fs'
 import cmd from 'node-cmd'
+import { Message } from 'element-ui'
 import { StateEnum } from './constant'
 
 import log from 'electron-log'
 const logger = log.create('InstrumentsServerLog')
 logger.transports.file.fileName = 'InstrumentsServer.log'
 logger.transports.console.level = process.env.NODE_ENV === 'development' ? 'silly' : false
+const serviceLogDir = path.join(path.dirname(logger.transports.file.getFile().path), 'instrumentsCaller_logs')
 
 const serverPort = 24242
 let pythonProcess = null
@@ -20,22 +23,38 @@ export let serverState = StateEnum.STATE_STOP
 const registerMonitorList = []
 
 function execFilePath() {
-  return path.join(process.cwd(), 'pydist', 'InstrumentsServer')
+  let distDir
+  if (process.env.NODE_ENV === 'development') {
+    distDir = process.cwd()
+  } else {
+    // eslint-disable-next-line no-undef
+    distDir = path.dirname(__static)
+  }
+  return path.join(distDir, 'pydist', 'InstrumentsServer')
 }
 
 /**
  * 启动性能测试服务
  */
 export function init() {
+  console.log('python文件地址', execFilePath())
   return new Promise((res, rej) => {
     if (pythonProcess != null) {
       logger.info('InstrumentsCaller服务已启动')
       rpcConnect()
-      // return
       res()
     }
     new Promise((resolve, reject) => {
-      pythonProcess = child_process.execFile(execFilePath(), ['--port', serverPort])
+      if (!fs.existsSync(serviceLogDir)) {
+        fs.mkdirSync(serviceLogDir)
+      }
+      const chmod = cmd.runSync('chmod 777 ' + execFilePath())
+      if (chmod.err) {
+        console.error('InstrumentsServer无执行权限, error=', chmod.err)
+        Message.error('InstrumentsServer无执行权限')
+        rej('InstrumentsServer无执行权限')
+      }
+      pythonProcess = child_process.execFile(execFilePath(), ['--port', serverPort, '--log', serviceLogDir])
       logger.info(`子进程pid=${pythonProcess.pid}`)
       // pythonProcess.stdout.on(
       //   'data',

@@ -25,3 +25,4 @@ tests/**/coverage/
 *.sln
 
 instrumentsCaller_logs/
+*-darwin-x64/

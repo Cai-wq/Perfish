@@ -21,11 +21,25 @@ export let serverState = StateEnum.STATE_STOP
 const registerMonitorList = []
 
 function execFilePath() {
-  return path.join(process.cwd(), 'pydist', 'AdbPerfServer')
+  let distDir
+  if (process.env.NODE_ENV === 'development') {
+    distDir = process.cwd()
+  } else {
+    // eslint-disable-next-line no-undef
+    distDir = path.resolve(`${__static}`, '..')
+  }
+  return path.join(distDir, 'pydist', 'AdbPerfServer')
 }
 
 function configFilePath() {
-  return path.join(process.cwd(), 'pydist', 'config.conf')
+  let distDir
+  if (process.env.NODE_ENV === 'development') {
+    distDir = process.cwd()
+  } else {
+    // eslint-disable-next-line no-undef
+    distDir = path.resolve(`${__static}`, '..')
+  }
+  return path.join(distDir, 'pydist', 'config.conf')
 }
 
 function outputPath() {
