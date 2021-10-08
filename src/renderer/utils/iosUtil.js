@@ -68,6 +68,25 @@ export function getIosApplications(deviceId) {
 }
 
 /**
+ * 获取应用Build号
+ */
+export function getAppBuildVersion(deviceId, bundleId) {
+  let buildVersion = '0'
+  if (!deviceId || deviceId === '' || !bundleId || bundleId === '') {
+    return buildVersion
+  }
+  const result = cmd.runSync('ideviceinstaller -u ' + deviceId + ' -l -o list_user | grep ' + bundleId)
+  const { err, data } = result
+  // console.log('执行命令, data=' + data + '\nerr=' + err)
+  if (err) {
+    console.error('获取iOS应用Build号失败, err=' + err)
+  } else {
+    buildVersion = data.replace(/\s+/g, '').replace(/\"/g, '').split(',')[1]
+  }
+  return buildVersion
+}
+
+/**
  * 获取设备详细信息
  */
 export function getIosDeviceInfo(deviceId) {

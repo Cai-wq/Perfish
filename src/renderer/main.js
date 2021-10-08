@@ -12,6 +12,7 @@ import store from './store'
 
 import '@/icons' // icon
 import '@/permission' // permission control
+import cmdPlugin from './utils/CmdPlugins'
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 
@@ -25,6 +26,8 @@ new Vue({
   store,
   template: '<App/>'
 }).$mount('#app')
+
+Vue.use(cmdPlugin)
 
 // 日志
 const logger = require('electron-log')

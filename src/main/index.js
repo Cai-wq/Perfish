@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron'
+// import fixPath from 'fix-path'
 
 /**
  * Set `__static` path to static files in production
@@ -6,6 +7,15 @@ import { app, BrowserWindow } from 'electron'
  */
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+  // fixPath()
+  process.env.PATH = [
+    './node_modules/.bin',
+    '/.nodebrew/current/bin',
+    '/usr/local/bin',
+    '/usr/local/Cellar',
+    '/opt/homebrew/Cellar',
+    process.env.PATH
+  ].join(':')
 }
 
 let mainWindow

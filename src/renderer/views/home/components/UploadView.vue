@@ -42,6 +42,8 @@
 
 <script>
   import { uploadPerformanceInfo } from '@/api/poseidon'
+  import { getAppBuildVersion as iosBuildVersion } from '@/utils/iosUtil'
+  import { getAppBuildVersion as androidBuildVersion } from '@/utils/AndroidUtil'
 
   export default {
     name: 'UploadView',
@@ -114,20 +116,31 @@
       }
     },
     methods: {
+      getAppBuildVersion(deviceId, packageName) {
+        return this.platform === 'Android' ? androidBuildVersion(deviceId, packageName) : iosBuildVersion(deviceId, packageName)
+      },
       submitUpload() {
+        const deviceId = this.deviceInfo.UDID
         const data = {
-          platform: this.platform,
+          platform: this.platform.toLowerCase(),
           title: this.uploadForm.title,
           description: this.uploadForm.description,
-          deviceId: this.deviceInfo.udid,
+          deviceId: deviceId,
           deviceInfo: {
-            devicePlatform: this.platform.toLowerCase(),
-            deviceName: this.deviceInfo.DeviceName,
-            udid: this.deviceInfo.UDID,
-            osVersion: this.deviceInfo.OSVersion
+            devices: [{
+              devicePlatform: this.platform.toLowerCase(),
+              deviceName: this.deviceInfo.DeviceName,
+              udid: deviceId,
+              osVersion: this.deviceInfo.OSVersion
+            }]
           },
           packageName: this.packageInfo.packageName,
-          packageInfo: this.packageInfo,
+          packageInfo: {
+            applicationName: this.packageInfo.name,
+            packageName: this.packageInfo.packageName,
+            version: this.packageInfo.version,
+            buildNum: this.getAppBuildVersion(deviceId, this.packageInfo.packageName)
+          },
           performanceData: this.performanceData.data,
           author: this.$store.getters.userInfo.name,
           startTime: this.performanceData.startTime,
