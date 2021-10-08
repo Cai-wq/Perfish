@@ -84,6 +84,24 @@ export function getAndroidApplications(deviceId) {
 }
 
 /**
+ * 获取应用Build号
+ */
+export function getAppBuildVersion(deviceId, packageName) {
+  let buildVersion = '0'
+  if (!deviceId || deviceId === '' || !packageName || packageName === '') {
+    return buildVersion
+  }
+  const result = cmd.runSync('adb -s ' + deviceId + ' shell dumpsys package ' + packageName + ' | grep versionCode | awk \'{print $1}\' | awk -F= \'{print $2}\'')
+  const { err, data } = result
+  if (err) {
+    console.error('获取Android应用Build号失败, err=' + err)
+  } else {
+    buildVersion = data
+  }
+  return buildVersion
+}
+
+/**
  * 获取设备详细信息
  */
 export function getAndroidDeviceInfo(deviceId) {
