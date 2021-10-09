@@ -4,7 +4,12 @@
       :visible.sync="show"
       @opened="afterOpen"
       @close="beforeClose">
-    <div class="app-container">
+    <div
+        class="app-container"
+        v-loading="uploading"
+        element-loading-text="上传中"
+        element-loading-spinner="el-icon-loading"
+        element-loading-background="rgba(0, 0, 0, 0.5)">
       <el-form ref="uploadForm" :model="uploadForm" :rules="formRules" label-width="80px" label-position="left">
         <el-form-item label="平台" prop="platform">
           <el-radio-group v-model="platform">
@@ -91,6 +96,7 @@
     data() {
       return {
         showUploadDialog: false,
+        uploading: false,
         uploadForm: {
           classify: [],
           title: null,
@@ -120,41 +126,45 @@
         return this.platform === 'Android' ? androidBuildVersion(deviceId, packageName) : iosBuildVersion(deviceId, packageName)
       },
       submitUpload() {
-        const deviceId = this.deviceInfo.UDID
-        const data = {
-          platform: this.platform.toLowerCase(),
-          title: this.uploadForm.title,
-          description: this.uploadForm.description,
-          deviceId: deviceId,
-          deviceInfo: {
-            devices: [{
-              devicePlatform: this.platform.toLowerCase(),
-              deviceName: this.deviceInfo.DeviceName,
-              udid: deviceId,
-              osVersion: this.deviceInfo.OSVersion
-            }]
-          },
-          packageName: this.packageInfo.packageName,
-          packageInfo: {
-            applicationName: this.packageInfo.name,
-            packageName: this.packageInfo.packageName,
-            version: this.packageInfo.version,
-            buildNum: this.getAppBuildVersion(deviceId, this.packageInfo.packageName)
-          },
-          performanceData: this.performanceData.data,
-          author: this.$store.getters.userInfo.name,
-          startTime: this.performanceData.startTime,
-          endTime: this.performanceData.endTime
-        }
         this.$refs.uploadForm.validate((valid) => {
           if (valid) {
+            this.uploading = true
+            const deviceId = this.deviceInfo.UDID
+            const data = {
+              platform: this.platform.toLowerCase(),
+              title: this.uploadForm.title.trim(),
+              description: this.uploadForm.description,
+              deviceId: deviceId,
+              deviceInfo: {
+                devices: [{
+                  devicePlatform: this.platform.toLowerCase(),
+                  deviceName: this.deviceInfo.DeviceName,
+                  udid: deviceId,
+                  osVersion: this.deviceInfo.OSVersion
+                }]
+              },
+              packageName: this.packageInfo.packageName,
+              packageInfo: {
+                applicationName: this.packageInfo.name,
+                packageName: this.packageInfo.packageName,
+                version: this.packageInfo.version,
+                buildNum: this.getAppBuildVersion(deviceId, this.packageInfo.packageName)
+              },
+              performanceData: this.performanceData.data,
+              author: this.$store.getters.userInfo.name,
+              startTime: this.performanceData.startTime,
+              endTime: this.performanceData.endTime
+            }
             uploadPerformanceInfo(data).then(res => {
               if (res.code === 200) {
                 this.$message.success('上传成功')
                 this.$emit('success')
               }
             }).catch(e => {
+              console.error('上传失败, error=', e)
               this.$message.error('上传失败, error=' + e)
+            }).finally(() => {
+              this.uploading = false
             })
           } else {
             return false

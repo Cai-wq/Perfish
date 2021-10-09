@@ -1,6 +1,6 @@
 <template>
   <div
-      v-loading="initializing"
+      v-loading="initializing || serverStarting"
       element-loading-text="环境准备中"
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.5)">
@@ -82,6 +82,7 @@
     },
     data() {
       return {
+        serverStarting: false,
         running: false,
         timer: null,
         startTime: null,
@@ -110,9 +111,11 @@
         console.log('开始性能采集! deviceId=' + this.deviceId + ', packageName=' + this.packageName)
         this.setRunning(true)
 
+        this.serverStarting = true
         // 启动性能数据采集
         PerformanceManager[this.platform].start(this.deviceId, this.packageName).then(() => {
           console.error('start返回成功')
+          this.serverStarting = false
           this.startTime = new Date().getTime()
           // 定时每秒dump一次数据
           this.timer = setInterval(() => {

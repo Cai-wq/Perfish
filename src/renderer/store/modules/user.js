@@ -63,12 +63,30 @@ const actions = {
         commit('SET_NAME', name)
         commit('SET_ACCOUNT', account)
         commit('SET_EMAIL', email)
-        // 用例平台使用
         setUserName(name)
         resolve(data)
       }).catch(error => {
         reject(error)
       })
+    })
+  },
+
+  // FIXME 没接单点，临时处理
+  setUserInfo({ commit }) {
+    return new Promise((resolve, reject) => {
+      try {
+        const token = 'QaTestTokenTemp'
+        commit('SET_TOKEN', token)
+        setToken(token)
+        const name = '性能桌面端'
+        commit('SET_NAME', name)
+        commit('SET_ACCOUNT', name)
+        commit('SET_EMAIL', name)
+        setUserName(name)
+        resolve(name)
+      } catch (error) {
+        reject(error)
+      }
     })
   },
 

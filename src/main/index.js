@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import cmd from 'node-cmd'
 // import fixPath from 'fix-path'
 
@@ -34,12 +34,14 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 900,
+    height: 930,
     useContentSize: true,
     width: 1700,
     webPreferences: {
       // 在网页中集成Node
-      nodeIntegration: true
+      nodeIntegration: true,
+      // renderer.js可以正常调用remote
+      enableRemoteModule: true
     }
   })
 
@@ -47,10 +49,7 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null
-    // 清理环境
-    cmd.runSync('ps aux | grep InstrumentsServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
-    cmd.runSync('ps aux | grep AdbPerfServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
-    app.exit()
+    cleanAndExit()
   })
 }
 
@@ -103,3 +102,16 @@ app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
  */
+
+// 监听手动退出事件
+ipcMain.on('SafeExit', (event, args) => {
+  console.error('退出, message=', JSON.stringify(args))
+  cleanAndExit()
+})
+
+function cleanAndExit() {
+  // 清理环境
+  cmd.runSync('ps aux | grep InstrumentsServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
+  cmd.runSync('ps aux | grep AdbPerfServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
+  app.exit()
+}

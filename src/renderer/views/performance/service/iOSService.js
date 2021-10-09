@@ -124,6 +124,9 @@ function rpcConnect() {
  */
 export function start(deviceId, bundleId) {
   return new Promise((resolve, reject) => {
+    if (!rpcClient) {
+      reject('rpcClient未初始化')
+    }
     rpcClient.invoke({ timeout: 30 }, 'start_test', deviceId, bundleId,
       function(error, res) {
         if (error) {
@@ -142,6 +145,9 @@ export function start(deviceId, bundleId) {
  */
 export function stop() {
   return new Promise((resolve, reject) => {
+    if (!rpcClient) {
+      reject('rpcClient未初始化')
+    }
     rpcClient.invoke('stop_test',
       function(error, res) {
         if (error) {
@@ -160,6 +166,9 @@ export function stop() {
  */
 export function dump() {
   return new Promise((resolve, reject) => {
+    if (!rpcClient) {
+      reject('rpcClient未初始化')
+    }
     rpcClient.invoke('dump', (error, res) => {
       if (error) {
         reject('dump性能数据失败, error=' + error)

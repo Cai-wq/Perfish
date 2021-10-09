@@ -39,14 +39,8 @@ export const constantRouterMap = [
 
   {
     path: '/settings',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'SettingsPage',
-        component: () => import('@/views/settings/index')
-      }
-    ]
+    name: 'SettingsPage',
+    component: () => import('@/views/settings/index')
   },
 
   { path: '*', redirect: '/404', hidden: true }
