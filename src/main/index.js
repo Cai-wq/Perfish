@@ -1,5 +1,11 @@
 import { app, BrowserWindow } from 'electron'
+import cmd from 'node-cmd'
 // import fixPath from 'fix-path'
+
+// 日志
+const logger = require('electron-log')
+logger.transports.console.level = 'silly'
+Object.assign(console, logger.functions)
 
 /**
  * Set `__static` path to static files in production
@@ -41,10 +47,30 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null
+    // 清理环境
+    cmd.runSync('ps aux | grep InstrumentsServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
+    cmd.runSync('ps aux | grep AdbPerfServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
+    app.exit()
   })
 }
 
-app.on('ready', createWindow)
+// 单例
+if (!app.requestSingleInstanceLock()) {
+  if (mainWindow) {
+    mainWindow.close()
+  }
+} else {
+  app.on('second-instance', (event, argv, workingDirectory) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore()
+      } else {
+        mainWindow.focus()
+      }
+    }
+  })
+  app.on('ready', createWindow)
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -57,11 +83,6 @@ app.on('activate', () => {
     createWindow()
   }
 })
-
-// 日志
-const logger = require('electron-log')
-logger.transports.console.level = 'silly'
-Object.assign(console, logger.functions)
 
 /**
  * Auto Updater
