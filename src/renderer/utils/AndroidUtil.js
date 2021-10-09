@@ -9,7 +9,12 @@ import cmd from 'node-cmd'
  */
 export function checkDepend() {
   const result = cmd.runSync('adb --version')
-  return !result.err
+  console.log('AndroidSDK ', result.data)
+  if (result.err) {
+    console.error('AndroidSDK error=', result.err)
+    return false
+  }
+  return true
 }
 
 /**

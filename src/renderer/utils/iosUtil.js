@@ -5,11 +5,20 @@
 import cmd from 'node-cmd'
 
 /**
- * 检查有没装Tidevice
+ * 检查有没装Tidevice和libimobiledevice
  */
-export function checkDepend() {
-  const result = cmd.runSync('tidevice --version')
-  return !result.err
+export function checkIosDepend() {
+  const checkTidevice = cmd.runSync('tidevice --version')
+  console.log('tidevice version=', checkTidevice.data)
+  if (checkTidevice.err) {
+    console.error('tidevice error=', checkTidevice.err)
+  }
+  const checkIdeviceinstaller = cmd.runSync('ideviceinstaller --version')
+  console.log(checkIdeviceinstaller.data)
+  if (checkIdeviceinstaller.err) {
+    console.error('ideviceinstaller error=', checkIdeviceinstaller.err)
+  }
+  return checkTidevice.err == null && checkIdeviceinstaller.err == null
 }
 
 /**
