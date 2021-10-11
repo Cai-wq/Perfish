@@ -42,7 +42,9 @@ function createWindow() {
       // 在网页中集成Node
       nodeIntegration: true,
       // renderer.js可以正常调用remote
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      // 允许跨域
+      webSecurity: false
     }
   })
 
