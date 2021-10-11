@@ -17,7 +17,7 @@ logger.transports.console.level = process.env.NODE_ENV === 'development'
 const serverPort = 14242
 let pythonProcess = null
 let rpcClient = null
-export let serverState = StateEnum.STATE_STOP
+export let serverState = StateEnum.OFFLINE
 const registerMonitorList = []
 
 function execFilePath() {
@@ -43,50 +43,55 @@ function configFilePath() {
 }
 
 function outputPath() {
-  return path.join('~/Library', 'Lizhi', 'Perfect', 'AdbPerfServer')
+  return path.join('~/Library', 'Lizhi', require('electron').app.getName(), 'AdbPerfServer')
 }
 
 /**
  * 启动性能测试服务
  */
 export function init() {
-  if (pythonProcess != null) {
-    logger.info('InstrumentsCaller服务已启动')
-    rpcConnect()
-    return
-  }
-  new Promise((resolve, reject) => {
-    pythonProcess = child_process.execFile(execFilePath(),
-      ['--port', serverPort,
-        '--config', configFilePath()])
-    logger.info(`子进程pid=${pythonProcess.pid}`)
-    // pythonProcess.stdout.on(
-    //   'data',
-    //   (chunk) => {
-    //     logger.info('服务日志stdout===')
-    //     logger.info(chunk.toString())
-    //   }
-    // )
-    pythonProcess.stderr.on(
-      'data',
-      (chunk) => {
-        // logger.info('服务日志stderr===')
-        logger.info(chunk.toString())
-        if (chunk.toString().indexOf(
-          'start running on tcp://127.0.0.1:' + serverPort) !== -1) {
-          logger.info('AdbPerfServer服务已启动')
-          resolve()
-        }
+  return new Promise((res, rej) => {
+    if (pythonProcess != null) {
+      logger.info('AdbPerfServer服务已启动')
+      if (!rpcClient || rpcClient.closed()) {
+        rpcConnect()
       }
-    )
-  }).then(() => {
-    logger.info('[AdbPerfServer]-RPC服务已启动')
-    serverState = StateEnum.STATE_INITIALIZED
-    rpcConnect()
+      res()
+    }
+    new Promise((resolve, reject) => {
+      pythonProcess = child_process.execFile(execFilePath(),
+        ['--port', serverPort,
+          '--config', configFilePath()])
+      logger.info(`子进程pid=${pythonProcess.pid}`)
+      // pythonProcess.stdout.on(
+      //   'data',
+      //   (chunk) => {
+      //     logger.info('服务日志stdout===')
+      //     logger.info(chunk.toString())
+      //   }
+      // )
+      pythonProcess.stderr.on(
+        'data',
+        (chunk) => {
+          logger.info(chunk.toString())
+          if (chunk.toString().indexOf(
+            'start running on tcp://127.0.0.1:' + serverPort) !== -1) {
+            logger.info('AdbPerfServer服务已启动')
+            resolve()
+          }
+        }
+      )
+    }).then(() => {
+      logger.info('[AdbPerfServer]-RPC服务已启动')
+      serverState = StateEnum.IDLE
+      rpcConnect()
+      res()
+    })
+    if (pythonProcess == null) {
+      rej('启动AdbPerfServer失败')
+      throw new Error('启动AdbPerfServer失败')
+    }
   })
-  if (pythonProcess == null) {
-    throw new Error('启动AdbPerfServer失败')
-  }
 }
 
 /**
@@ -114,7 +119,7 @@ export function start(deviceId, bundleId) {
           reject('启动性能数据采集失败, error=' + error)
         }
         logger.info('start log===========\n\n\n' + res)
-        serverState = StateEnum.STATE_RUNNING
+        serverState = StateEnum.TESTING
         res.split(',').forEach((item) => {
           registerMonitorList.push(item)
         })
@@ -138,7 +143,7 @@ export function stop() {
           reject('停止性能数据采集失败, error=' + error)
         }
         logger.info('stop log===========\n\n\n' + res)
-        serverState = StateEnum.STATE_STOP
+        serverState = StateEnum.IDLE
         resolve(res)
       })
   })
@@ -173,7 +178,8 @@ export function kill() {
   if (pythonProcess != null) {
     pythonProcess.kill('SIGTERM')
     pythonProcess.kill(9)
-    cmd.runSync('ps aux | grep InstrumentsServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
+    cmd.runSync('ps aux | grep AdbPerfServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
     pythonProcess = null
   }
+  serverState = StateEnum.OFFLINE
 }

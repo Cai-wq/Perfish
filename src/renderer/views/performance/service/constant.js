@@ -2,7 +2,10 @@
  * Created by CaiWeiQi on 2021/9/15
  */
 export const StateEnum = {
-  STATE_STOP: 0,
-  STATE_INITIALIZED: 101,
-  STATE_RUNNING: 102
+  // 服务未初始化
+  OFFLINE: 0,
+  // 空闲
+  IDLE: 101,
+  // 采集数据中
+  TESTING: 102
 }

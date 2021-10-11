@@ -19,7 +19,7 @@ const serviceLogDir = path.join(path.dirname(logger.transports.file.getFile().pa
 const serverPort = 24242
 let pythonProcess = null
 let rpcClient = null
-export let serverState = StateEnum.STATE_STOP
+export let serverState = StateEnum.OFFLINE
 const registerMonitorList = []
 
 function execFilePath() {
@@ -37,14 +37,16 @@ function execFilePath() {
  * 启动性能测试服务
  */
 export function init() {
-  console.log('python文件地址', execFilePath())
   return new Promise((res, rej) => {
     if (pythonProcess != null) {
       logger.info('InstrumentsCaller服务已启动')
-      rpcConnect()
+      if (!rpcClient || rpcClient.closed()) {
+        rpcConnect()
+      }
       res()
     }
     new Promise((resolve, reject) => {
+      console.log('python文件地址', execFilePath())
       if (!fs.existsSync(serviceLogDir)) {
         fs.mkdirSync(serviceLogDir)
       }
@@ -66,7 +68,6 @@ export function init() {
       pythonProcess.stderr.on(
         'data',
         (chunk) => {
-          // logger.info('服务日志stderr===')
           logger.info(chunk.toString())
           if (chunk.toString().indexOf(
             'start running on tcp://127.0.0.1:' + serverPort) !== -1) {
@@ -93,7 +94,7 @@ export function init() {
       )
     }).then(() => {
       logger.info('[InstrumentsCaller]-RPC服务已启动')
-      serverState = StateEnum.STATE_INITIALIZED
+      serverState = StateEnum.IDLE
       rpcConnect()
       res()
     })
@@ -133,7 +134,7 @@ export function start(deviceId, bundleId) {
           reject('启动性能数据采集失败, error=' + error)
         }
         logger.info('start log===========\n\n\n' + res)
-        serverState = StateEnum.STATE_RUNNING
+        serverState = StateEnum.TESTING
         resolve(res)
       })
   })
@@ -154,7 +155,7 @@ export function stop() {
           reject('停止性能数据采集失败, error=' + error)
         }
         logger.info('stop log===========\n\n\n' + res)
-        serverState = StateEnum.STATE_STOP
+        serverState = StateEnum.IDLE
         resolve(res)
       })
   })
@@ -192,4 +193,5 @@ export function kill() {
     cmd.runSync('ps aux | grep InstrumentsServer | grep -v grep | awk \'{print $2}\' | xargs kill -9')
     pythonProcess = null
   }
+  serverState = StateEnum.OFFLINE
 }
