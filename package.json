@@ -1,8 +1,8 @@
 {
-  "name": "perfect-performance",
+  "name": "perf-fish",
   "version": "1.0.0",
   "author": "蔡伟琪 <caiweiqi@lizhi.fm>",
-  "description": "移动端性能测试工具Perfect-Performance",
+  "description": "移动端性能测试工具",
   "license": "MIT",
   "main": "./dist/electron/main.js",
   "scripts": {
@@ -17,11 +17,13 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
+    "mac": "export CSC_IDENTITY_AUTO_DISCOVERY=false && node .electron-vue/build.js && electron-builder build --mac",
+    "pack-app": "npm run pack:main && npm run pack:renderer && ./node_modules/.bin/electron-packager . --overwrite --ignore=py$",
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "perfect-performance",
-    "appId": "fm.lizhi.testing.perfect-performance",
+    "productName": "PerfFish",
+    "appId": "fm.lizhi.testing.perfish",
     "directories": {
       "output": "build"
     },
@@ -45,7 +47,7 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/gaff.icns"
     },
     "win": {
       "icon": "build/icons/icon.ico"
