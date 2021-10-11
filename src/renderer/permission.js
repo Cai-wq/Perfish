@@ -71,7 +71,6 @@ router.beforeEach(async(to, from, next) => {
   // start progress bar
   NProgress.start()
   if (!store.getters.token) {
-    console.error('重置用户信息')
     await store.dispatch('user/setUserInfo')
   }
   next()

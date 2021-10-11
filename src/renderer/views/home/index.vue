@@ -14,7 +14,7 @@
           </el-tab-pane>
         </el-tabs>
 
-        <el-select v-model="device" value-key="udid" placeholder="请选择测试设备" style="width: 100%" :disabled="testing" @change="chooseDevice">
+        <el-select v-model="device" value-key="udid" placeholder="请选择测试设备" style="width: 100%" :disabled="testing" @visible-change="updateDeviceList" @change="chooseDevice">
           <el-option
             v-for="item in deviceList"
             :key="item.udid"
@@ -23,7 +23,7 @@
             <span><strong>{{ item.name }}</strong> ({{ item.udid }})</span>
           </el-option>
         </el-select>
-        <el-select v-model="app" value-key="packageName" placeholder="请选择测试应用" style="width: 100%" :disabled="testing">
+        <el-select v-model="app" value-key="packageName" placeholder="请选择测试应用" filterable default-first-option style="width: 100%" :disabled="testing">
           <el-option
               v-for="item in appList"
               :key="item.packageName"
@@ -71,6 +71,7 @@
     data() {
       return {
         platform: 'iOS',
+        deviceList: [],
         device: {
           udid: undefined,
           name: undefined
@@ -86,9 +87,6 @@
       }
     },
     computed: {
-      deviceList() {
-        return this.platform === 'Android' ? this.getAndroidDeviceList() : this.getIosDeviceList()
-      },
       appList() {
         if (!this.device || !this.device.udid) {
           return []
@@ -134,6 +132,14 @@
           console.error('初始化' + this.platform + '性能服务失败, error=', err)
           this.initializing = true
         })
+      },
+      updateDeviceList(show) {
+        if (show) {
+          this.deviceList = this.platform === 'Android' ? this.getAndroidDeviceList() : this.getIosDeviceList()
+        }
+        if (this.device && this.deviceList.indexOf(this.device) < 0) {
+          this.device = undefined
+        }
       },
       chooseDevice() {
         this.app = null
