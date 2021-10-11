@@ -20,6 +20,7 @@ if (process.env.NODE_ENV !== 'development') {
     '/usr/local/bin',
     '/usr/local/Cellar',
     '/opt/homebrew/Cellar',
+    '/opt/homebrew/bin',
     process.env.PATH
   ].join(':')
 }
