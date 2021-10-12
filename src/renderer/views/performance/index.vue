@@ -157,6 +157,9 @@
               })
             })
           }, 1000)
+        }).catch(error => {
+          console.error('Start失败, error=', error)
+          this.$message.error('Start失败, error=' + error)
         })
       },
       stopTest() {
