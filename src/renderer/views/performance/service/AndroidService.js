@@ -43,7 +43,7 @@ function configFilePath() {
 }
 
 function outputPath() {
-  return path.join('~/Library', 'Lizhi', require('electron').app.getName(), 'AdbPerfServer')
+  return path.join('~/Library', 'Lizhi', 'PerfFish', 'AdbPerfServer')
 }
 
 /**
@@ -120,7 +120,7 @@ export function start(deviceId, bundleId) {
         }
         logger.info('start log===========\n\n\n' + res)
         serverState = StateEnum.TESTING
-        res.split(',').forEach((item) => {
+        res.toString().split(',').forEach((item) => {
           registerMonitorList.push(item)
         })
         resolve(res)

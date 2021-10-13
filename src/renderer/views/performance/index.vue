@@ -1,7 +1,7 @@
 <template>
   <div
-      v-loading="initializing || serverStarting"
-      element-loading-text="环境准备中"
+      v-loading="initializing || serverHandling"
+      :element-loading-text="initializing ? '环境准备中' : '系统处理中, 请稍后, 不要重复操作'"
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.5)">
     <h3 style="float: left">移动端性能测试</h3>
@@ -82,7 +82,7 @@
     },
     data() {
       return {
-        serverStarting: false,
+        serverHandling: false,
         running: false,
         timer: null,
         startTime: null,
@@ -111,11 +111,11 @@
         console.log('开始性能采集! deviceId=' + this.deviceId + ', packageName=' + this.packageName)
         this.setRunning(true)
 
-        this.serverStarting = true
+        this.serverHandling = true
         // 启动性能数据采集
         PerformanceManager[this.platform].start(this.deviceId, this.packageName).then(() => {
           console.error('start返回成功')
-          this.serverStarting = false
+          this.serverHandling = false
           this.startTime = new Date().getTime()
           // 定时每秒dump一次数据
           this.timer = setInterval(() => {
@@ -164,10 +164,12 @@
       },
       stopTest() {
         console.log('测试结束')
+        this.serverHandling = true
         this.endTime = new Date().getTime()
         clearInterval(this.timer)
         this.timer = null
         PerformanceManager[this.platform].stop().then(() => {
+          this.serverHandling = false
           this.setRunning(false)
         })
       },

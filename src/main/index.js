@@ -21,6 +21,11 @@ if (process.env.NODE_ENV !== 'development') {
     '/usr/local/Cellar',
     '/opt/homebrew/Cellar',
     '/opt/homebrew/bin',
+    '/Library/Frameworks/Python.framework/Versions/3/bin',
+    '/Library/Frameworks/Python.framework/Versions/3.6/bin',
+    '/Library/Frameworks/Python.framework/Versions/3.7/bin',
+    '/Library/Frameworks/Python.framework/Versions/3.8/bin',
+    '/Library/Frameworks/Python.framework/Versions/3.9/bin',
     process.env.PATH
   ].join(':')
 }
@@ -35,7 +40,7 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 930,
+    height: 940,
     useContentSize: true,
     width: 1700,
     webPreferences: {
