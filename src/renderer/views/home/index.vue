@@ -5,8 +5,7 @@
         <user-info-view />
 
         <el-tabs v-model="platform" stretch @tab-click="switchPlatform">
-          <el-tab-pane name="Android" :disabled="testing || true">
-            <!-- FIXME 安卓暂不开放 -->
+          <el-tab-pane name="Android" :disabled="testing">
             <span slot="label"><svg-icon icon-class="android-logo" /> Android</span>
           </el-tab-pane>
           <el-tab-pane name="iOS" :disabled="testing">
@@ -56,7 +55,7 @@
   import UploadView from './components/UploadView'
   import PerformancePage from '@/views/performance'
   import { checkIosDepend, getIosDevices, getIosApplications } from '@/utils/iosUtil'
-  import { getAndroidDevices, getAndroidApplications } from '@/utils/AndroidUtil'
+  import { checkAndroidDepend, getAndroidDevices, getAndroidApplications } from '@/utils/AndroidUtil'
   import { PerformanceManager } from '@/views/performance/service/PerformanceManager'
   import { ipcRenderer } from 'electron'
 
@@ -103,13 +102,6 @@
         }).finally(() => {
           ipcRenderer.send('SafeExit', 'iOS依赖缺失')
         })
-      // } else if (!checkAndroidDepend()) {
-      //   this.$alert('请先安装 Android SDK', '缺乏必要依赖', {
-      //     confirmButtonText: '退出',
-      //     type: 'error'
-      //   }).finally(() => {
-      //     ipcRenderer.send('SafeExit', 'Android依赖缺失')
-      //   })
       } else {
         this.initPerformanceService()
       }

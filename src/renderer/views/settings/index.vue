@@ -5,9 +5,6 @@
       <el-form-item label="用户姓名" prop="userName">
         <el-input maxlength="8" show-word-limit v-model="settingForm.userName" />
       </el-form-item>
-      <el-form-item label="ANDROID_HOME" prop="androidHome">
-        <el-input v-model="settingForm.androidHome" />
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="saveSettings">保存</el-button>
       </el-form-item>
@@ -28,9 +25,6 @@
           userName: [
             { required: true, message: '请输入姓名', trigger: 'blur' },
             { min: 2, max: 8, message: '姓名长度不能超过8字符', trigger: 'blur' }
-          ],
-          androidHome: [
-            { max: 255, message: 'ANDROID_HOME长度不能超过255字符', trigger: 'blur' }
           ]
         }
       }

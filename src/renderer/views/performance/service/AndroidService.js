@@ -7,8 +7,10 @@ import child_process from 'child_process'
 import path from 'path'
 import cmd from 'node-cmd'
 import { StateEnum } from './constant'
+import { getAdbPath } from '@/utils/AndroidUtil'
 
 import log from 'electron-log'
+import { Message } from 'element-ui'
 const logger = log.create('AdbPerfServerLog')
 logger.transports.file.fileName = 'AdbPerfServer.log'
 logger.transports.console.level = process.env.NODE_ENV === 'development'
@@ -43,7 +45,7 @@ function configFilePath() {
 }
 
 function outputPath() {
-  return path.join('~/Library', 'Lizhi', 'PerfFish', 'AdbPerfServer')
+  return path.join(path.dirname(logger.transports.file.getFile().path), 'AdbPerfServer_output')
 }
 
 /**
@@ -59,9 +61,16 @@ export function init() {
       res()
     }
     new Promise((resolve, reject) => {
+      const chmod = cmd.runSync('chmod 777 ' + execFilePath())
+      if (chmod.err) {
+        console.error('AdbPerfServer无执行权限, error=', chmod.err)
+        Message.error('AdbPerfServer无执行权限')
+        rej('AdbPerfServer无执行权限')
+      }
       pythonProcess = child_process.execFile(execFilePath(),
         ['--port', serverPort,
-          '--config', configFilePath()])
+          '--config', configFilePath(),
+          '--adb_path', getAdbPath()])
       logger.info(`子进程pid=${pythonProcess.pid}`)
       // pythonProcess.stdout.on(
       //   'data',
@@ -143,6 +152,7 @@ export function stop() {
           reject('停止性能数据采集失败, error=' + error)
         }
         logger.info('stop log===========\n\n\n' + res)
+        cmd.runSync('rm -rf ' + outputPath())
         serverState = StateEnum.IDLE
         resolve(res)
       })

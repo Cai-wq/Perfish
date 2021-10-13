@@ -3,12 +3,40 @@
  * Created by CaiWeiQi on 2021/9/3
  */
 import cmd from 'node-cmd'
+import path from 'path'
+
+/**
+ * 获取adb路径
+ */
+export function getAdbPath() {
+  let distDir
+  if (process.env.NODE_ENV === 'development') {
+    distDir = process.cwd()
+  } else {
+    // eslint-disable-next-line no-undef
+    distDir = path.dirname(__static)
+  }
+  const adb = path.join(distDir, 'pydist', 'adb')
+  // const chmod = cmd.runSync('[ -w ' + adb + ' ] && echo "adb yes" || chmod 777 ' + adb)
+  const chmod = cmd.runSync('chmod 777 ' + adb)
+  if (chmod.err) {
+    console.error('adb无执行权限, error=', chmod.err)
+  }
+  return adb
+}
+
+/**
+ * 执行adb命令
+ */
+export function adbExec(command) {
+  return cmd.runSync(getAdbPath() + ' ' + command)
+}
 
 /**
  * 检查有没装Android SDK
  */
-export function checkDepend() {
-  const result = cmd.runSync('adb --version')
+export function checkAndroidDepend() {
+  const result = adbExec('--version')
   console.log('AndroidSDK ', result.data)
   if (result.err) {
     console.error('AndroidSDK error=', result.err)
@@ -22,7 +50,7 @@ export function checkDepend() {
  */
 export function getAndroidDevices() {
   const deviceList = []
-  const result = cmd.runSync('adb devices -l')
+  const result = adbExec('devices -l')
   const { err, data } = result
   // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
@@ -49,7 +77,7 @@ export function getAndroidDeviceName(deviceId) {
   if (!deviceId || deviceId === '') {
     return ''
   }
-  const result = cmd.runSync('adb -s ' + deviceId + ' shell getprop ro.product.device')
+  const result = adbExec('-s ' + deviceId + ' shell getprop ro.product.device')
   const { err, data } = result
   // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
@@ -68,7 +96,7 @@ export function getAndroidApplications(deviceId) {
   if (!deviceId || deviceId === '') {
     return appList
   }
-  const result = cmd.runSync('adb -s ' + deviceId + ' shell pm list package -3')
+  const result = adbExec('-s ' + deviceId + ' shell pm list package -3')
   const { err, data } = result
   // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
@@ -96,7 +124,7 @@ export function getAppBuildVersion(deviceId, packageName) {
   if (!deviceId || deviceId === '' || !packageName || packageName === '') {
     return buildVersion
   }
-  const result = cmd.runSync('adb -s ' + deviceId + ' shell dumpsys package ' + packageName + ' | grep versionCode | awk \'{print $1}\' | awk -F= \'{print $2}\'')
+  const result = adbExec('-s ' + deviceId + ' shell dumpsys package ' + packageName + ' | grep versionCode | awk \'{print $1}\' | awk -F= \'{print $2}\'')
   const { err, data } = result
   if (err) {
     console.error('获取Android应用Build号失败, err=' + err)
@@ -115,7 +143,7 @@ export function getAndroidDeviceInfo(deviceId) {
     return systemInfo
   }
   // 系统信息
-  const getpropResult = cmd.runSync('adb -s ' + deviceId + ' shell getprop')
+  const getpropResult = adbExec('-s ' + deviceId + ' shell getprop')
   const { err, data } = getpropResult
   // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
@@ -158,7 +186,7 @@ export function getAndroidDeviceCPUInfo(deviceId) {
     return cpuInfo
   }
   // 系统信息
-  const result = cmd.runSync('adb -s ' + deviceId + ' shell cat /proc/cpuinfo')
+  const result = adbExec('-s ' + deviceId + ' shell cat /proc/cpuinfo')
   const { err, data } = result
   // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
@@ -185,7 +213,7 @@ export function getAndroidDeviceMemoryTotal(deviceId) {
     return null
   }
   // 系统信息
-  const result = cmd.runSync('adb -s ' + deviceId + ' shell cat /proc/meminfo | grep MemTotal | awk \'{printf $2}\'')
+  const result = adbExec('-s ' + deviceId + ' shell cat /proc/meminfo | grep MemTotal | awk \'{printf $2}\'')
   const { err, data } = result
   // console.log('执行命令, data=' + data + '\nerr=' + err)
   if (err) {
