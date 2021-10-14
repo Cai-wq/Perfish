@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import app from './modules/app'
 import user from './modules/user'
+import performance from './modules/performance'
 import getters from './getters'
 import VuexPersistence from 'vuex-persist'
 
@@ -16,7 +17,8 @@ const store = new Vuex.Store({
   plugins: [vuexLocal.plugin],
   modules: {
     app,
-    user
+    user,
+    performance
   },
   getters
 })

@@ -101,6 +101,7 @@
           ipcRenderer.send('SafeExit', 'iOS依赖缺失')
         })
       } else {
+        this.platform = this.$store.getters.platform
         this.initPerformanceService()
       }
     },
@@ -116,6 +117,7 @@
         this.showUploadDialog = false
         this.initializing = true
         this.initPerformanceService()
+        this.$store.dispatch('performance/setPlatform', this.platform)
       },
       initPerformanceService() {
         PerformanceManager[this.platform].init().then(() => {

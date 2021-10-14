@@ -12,6 +12,7 @@ const getters = {
       avatar: state.user.avatar
     }
   },
-  roles: state => state.user.roles
+  roles: state => state.user.roles,
+  platform: state => state.performance.platform
 }
 export default getters
