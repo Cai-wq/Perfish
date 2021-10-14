@@ -47,7 +47,6 @@
 
 <script>
   import { uploadPerformanceInfo } from '@/api/poseidon'
-  import { getAppBuildVersion as iosBuildVersion } from '@/utils/iosUtil'
   import { getAppBuildVersion as androidBuildVersion } from '@/utils/AndroidUtil'
 
   export default {
@@ -123,7 +122,7 @@
     },
     methods: {
       getAppBuildVersion(deviceId, packageName) {
-        return this.platform === 'Android' ? androidBuildVersion(deviceId, packageName) : iosBuildVersion(deviceId, packageName)
+        return this.platform === 'Android' ? androidBuildVersion(deviceId, packageName) : this.packageInfo.buildNum
       },
       submitUpload() {
         this.$refs.uploadForm.validate((valid) => {

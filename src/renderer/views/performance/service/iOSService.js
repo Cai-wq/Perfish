@@ -180,6 +180,60 @@ export function dump() {
 }
 
 /**
+ * 获取本地设备列表
+ * @returns {Promise<unknown>}
+ */
+export function getIosDeviceList() {
+  return new Promise((resolve, reject) => {
+    if (!rpcClient) {
+      reject('rpcClient未初始化')
+    }
+    rpcClient.invoke('get_device_list', (error, res) => {
+      if (error) {
+        reject('get_device_list失败, error=' + error)
+      }
+      resolve(res)
+    })
+  })
+}
+
+/**
+ * 获取设备详情
+ * @returns {Promise<unknown>}
+ */
+export function getIosDeviceInfo(deviceId) {
+  return new Promise((resolve, reject) => {
+    if (!rpcClient) {
+      reject('rpcClient未初始化')
+    }
+    rpcClient.invoke('get_device_info', deviceId, (error, res) => {
+      if (error) {
+        reject('get_device_info失败, error=' + error)
+      }
+      resolve(res)
+    })
+  })
+}
+
+/**
+ * 获取本地设备列表
+ * @returns {Promise<unknown>}
+ */
+export function getIosAppList(deviceId) {
+  return new Promise((resolve, reject) => {
+    if (!rpcClient) {
+      reject('rpcClient未初始化')
+    }
+    rpcClient.invoke('get_app_list', deviceId, (error, res) => {
+      if (error) {
+        reject('get_app_list失败, error=' + error)
+      }
+      resolve(res)
+    })
+  })
+}
+
+/**
  * 关闭性能测试服务
  */
 export function kill() {

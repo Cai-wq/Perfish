@@ -5,24 +5,20 @@
 import cmd from 'node-cmd'
 
 /**
- * 检查有没装Tidevice和libimobiledevice
+ * 检查有没装XCode及命令行工具
  */
 export function checkIosDepend() {
-  const checkTidevice = cmd.runSync('tidevice --version')
-  console.log('tidevice version=', checkTidevice.data)
-  if (checkTidevice.err) {
-    console.error('tidevice error=', checkTidevice.err)
+  const checkXcode = cmd.runSync('xcode-select --version')
+  console.log(checkXcode.data)
+  if (checkXcode.err) {
+    console.error('xcode-select error=', checkXcode.err)
   }
-  const checkIdeviceinstaller = cmd.runSync('ideviceinstaller --version')
-  console.log(checkIdeviceinstaller.data)
-  if (checkIdeviceinstaller.err) {
-    console.error('ideviceinstaller error=', checkIdeviceinstaller.err)
-  }
-  return checkTidevice.err == null && checkIdeviceinstaller.err == null
+  return checkXcode.err == null
 }
 
 /**
  * 获取iOS可用设备列表
+ * @deprecated 已废弃，直接走InstrumentsCaller调rpc
  */
 export function getIosDevices() {
   const deviceList = []
@@ -47,6 +43,7 @@ export function getIosDevices() {
 
 /**
  * 获取设备中所有第三方应用
+ * @deprecated 已废弃，直接走InstrumentsCaller调rpc
  */
 export function getIosApplications(deviceId) {
   const appList = []
@@ -78,6 +75,7 @@ export function getIosApplications(deviceId) {
 
 /**
  * 获取应用Build号
+ * @deprecated 已废弃，直接走InstrumentsCaller调rpc
  */
 export function getAppBuildVersion(deviceId, bundleId) {
   let buildVersion = '0'
@@ -97,6 +95,7 @@ export function getAppBuildVersion(deviceId, bundleId) {
 
 /**
  * 获取设备详细信息
+ * @deprecated 已废弃，直接走InstrumentsCaller调rpc
  */
 export function getIosDeviceInfo(deviceId) {
   const deviceInfo = {}

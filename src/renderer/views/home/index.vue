@@ -1,5 +1,9 @@
 <template>
-  <div>
+  <div
+      v-loading="initializing"
+      element-loading-text="初始化服务..."
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.5)">
     <el-container>
       <el-aside>
         <user-info-view />
@@ -22,7 +26,7 @@
             <span><strong>{{ item.name }}</strong> ({{ item.udid }})</span>
           </el-option>
         </el-select>
-        <el-select v-model="app" value-key="packageName" placeholder="请选择测试应用" filterable default-first-option style="width: 100%" :disabled="testing">
+        <el-select v-model="app" value-key="packageName" placeholder="请选择测试应用" filterable default-first-option style="width: 100%" :disabled="testing" @visible-change="updateAppList">
           <el-option
               v-for="item in appList"
               :key="item.packageName"
@@ -39,7 +43,7 @@
 
       <el-main>
         <performance-page :platform="platform" :device-id="device ? device.udid : undefined"
-                          :package-name="app ? app.packageName : undefined" :initializing="initializing"
+                          :package-name="app ? app.packageName : undefined" :initializing="false"
                           @start="onTesting" @stop="onFinish"/>
       </el-main>
 
@@ -54,8 +58,9 @@
   import DeviceInfoView from './components/DeviceInfoView'
   import UploadView from './components/UploadView'
   import PerformancePage from '@/views/performance'
-  import { checkIosDepend, getIosDevices, getIosApplications } from '@/utils/iosUtil'
-  import { checkAndroidDepend, getAndroidDevices, getAndroidApplications } from '@/utils/AndroidUtil'
+  import { getIosDeviceList, getIosAppList } from '@/views/performance/service/iOSService'
+  import { checkIosDepend } from '@/utils/iosUtil'
+  import { getAndroidDevices, getAndroidApplications } from '@/utils/AndroidUtil'
   import { PerformanceManager } from '@/views/performance/service/PerformanceManager'
   import { ipcRenderer } from 'electron'
 
@@ -76,6 +81,7 @@
           name: undefined
         },
         deviceInfo: {},
+        appList: [],
         app: undefined,
         initializing: true,
         performanceData: {
@@ -85,18 +91,10 @@
         showUploadDialog: false
       }
     },
-    computed: {
-      appList() {
-        if (!this.device || !this.device.udid) {
-          return []
-        }
-        return this.platform === 'Android' ? this.getAndroidAppList(this.device.udid) : this.getIosAppList(this.device.udid)
-      }
-    },
     mounted() {
       // 检查环境
       if (!checkIosDepend()) {
-        this.$alert('请先安装 TiDevice 和 libimobiledevice', '缺乏必要依赖', {
+        this.$alert('请先安装 XCode及Command Line Tools', '缺乏必要依赖', {
           confirmButtonText: '退出',
           type: 'error'
         }).finally(() => {
@@ -111,7 +109,9 @@
     },
     methods: {
       switchPlatform() {
+        this.deviceList = []
         this.device = undefined
+        this.appList = []
         this.app = undefined
         this.showUploadDialog = false
         this.initializing = true
@@ -127,35 +127,41 @@
       },
       updateDeviceList(show) {
         if (show) {
-          this.deviceList = this.platform === 'Android' ? this.getAndroidDeviceList() : this.getIosDeviceList()
-        }
-        if (this.device && this.deviceList.indexOf(this.device) < 0) {
-          this.device = undefined
+          if (this.platform === 'Android') {
+            this.deviceList = getAndroidDevices()
+          } else {
+            getIosDeviceList().then(result => {
+              this.deviceList = result
+            }).catch(e => {
+              this.deviceList = []
+            })
+          }
+        } else {
+          if (this.device && this.deviceList.indexOf(this.device) < 0) {
+            this.device = undefined
+          }
         }
       },
       chooseDevice() {
         this.app = null
-      },
-      getIosDeviceList() {
-        return getIosDevices()
-      },
-      getAndroidDeviceList() {
-        return getAndroidDevices()
+        this.updateAppList()
       },
       updateDeviceInfo(val) {
         this.deviceInfo = val
       },
-      getIosAppList(deviceId) {
-        if (!deviceId || deviceId === '') {
+      updateAppList() {
+        if (!this.device || !this.device.udid) {
           return []
         }
-        return getIosApplications(deviceId)
-      },
-      getAndroidAppList(deviceId) {
-        if (!deviceId || deviceId === '') {
-          return []
+        if (this.platform === 'Android') {
+          this.appList = getAndroidApplications(this.device.udid)
+        } else {
+          getIosAppList(this.device.udid).then(result => {
+            this.appList = result
+          }).catch(e => {
+            this.appList = []
+          })
         }
-        return getAndroidApplications(deviceId)
       },
       onTesting(val) {
         this.testing = val === true || val === 'true' || val === 1

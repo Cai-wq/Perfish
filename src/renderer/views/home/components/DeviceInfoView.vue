@@ -8,7 +8,7 @@
 </template>
 
 <script>
-  import { getIosDeviceInfo } from '@/utils/iosUtil'
+  import { getIosDeviceInfo } from '@/views/performance/service/iOSService'
   import { getAndroidDeviceInfo } from '@/utils/AndroidUtil'
 
   export default {
@@ -55,13 +55,21 @@
       }
     },
     methods: {
-      getDeviceInfo(platform, deviceId) {
+      async getDeviceInfo(platform, deviceId) {
         if (!deviceId || deviceId === '') {
           console.log('请选择测试设备')
           this.deviceInfo = {}
           return
         }
-        this.deviceInfo = platform === 'Android' ? getAndroidDeviceInfo(deviceId) : getIosDeviceInfo(deviceId)
+        if (this.platform === 'Android') {
+          this.deviceInfo = getAndroidDeviceInfo(deviceId)
+        } else {
+          await getIosDeviceInfo(deviceId).then(result => {
+            this.deviceInfo = result
+          }).catch(e => {
+            this.deviceInfo = {}
+          })
+        }
         this.$emit('update', this.deviceInfo)
       }
     }
