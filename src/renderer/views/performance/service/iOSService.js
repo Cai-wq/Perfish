@@ -37,14 +37,16 @@ function execFilePath() {
  * 启动性能测试服务
  */
 export function init() {
-  return new Promise((res, rej) => {
-    if (pythonProcess != null) {
+  if (pythonProcess != null) {
+    return new Promise((res, rej) => {
       logger.info('InstrumentsCaller服务已启动')
       if (!rpcClient || rpcClient.closed()) {
         rpcConnect()
       }
       res()
-    }
+    })
+  }
+  return new Promise((res, rej) => {
     new Promise((resolve, reject) => {
       console.log('python文件地址', execFilePath())
       if (!fs.existsSync(serviceLogDir)) {
@@ -57,7 +59,7 @@ export function init() {
         rej('InstrumentsServer无执行权限')
       }
       pythonProcess = child_process.execFile(execFilePath(), ['--port', serverPort, '--log', serviceLogDir])
-      logger.info(`子进程pid=${pythonProcess.pid}`)
+      logger.info(`InstrumentsCaller服务进程pid=${pythonProcess.pid}`)
       // pythonProcess.stdout.on(
       //   'data',
       //   (chunk) => {

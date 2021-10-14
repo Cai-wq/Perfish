@@ -52,14 +52,16 @@ function outputPath() {
  * 启动性能测试服务
  */
 export function init() {
-  return new Promise((res, rej) => {
-    if (pythonProcess != null) {
+  if (pythonProcess != null) {
+    return new Promise((res, rej) => {
       logger.info('AdbPerfServer服务已启动')
       if (!rpcClient || rpcClient.closed()) {
         rpcConnect()
       }
       res()
-    }
+    })
+  }
+  return new Promise((res, rej) => {
     new Promise((resolve, reject) => {
       const chmod = cmd.runSync('chmod 777 ' + execFilePath())
       if (chmod.err) {
@@ -71,7 +73,7 @@ export function init() {
         ['--port', serverPort,
           '--config', configFilePath(),
           '--adb_path', getAdbPath()])
-      logger.info(`子进程pid=${pythonProcess.pid}`)
+      logger.info(`AdbPerfServer服务进程pid=${pythonProcess.pid}`)
       // pythonProcess.stdout.on(
       //   'data',
       //   (chunk) => {
@@ -107,7 +109,11 @@ export function init() {
  * rpc客户端连接
  */
 function rpcConnect() {
-  rpcClient = new zerorpc.Client()
+  // 心跳设长点避免请求超时
+  const constLargeEnoughHeartbeat = 60 * 60 * 24 * 30 * 12 // 1 Year
+  rpcClient = new zerorpc.Client({
+    'heartbeatInterval': constLargeEnoughHeartbeat
+  })
   rpcClient.connect('tcp://127.0.0.1:' + serverPort)
 }
 
@@ -152,7 +158,8 @@ export function stop() {
           reject('停止性能数据采集失败, error=' + error)
         }
         logger.info('stop log===========\n\n\n' + res)
-        cmd.runSync('rm -rf ' + outputPath())
+        cmd.runSync('find ' + outputPath() + ' -name "*.csv" -type f -print -exec rm -rf {} \\;')
+        cmd.runSync('find ' + outputPath() + ' -name "*.json" -type f -print -exec rm -rf {} \\;')
         serverState = StateEnum.IDLE
         resolve(res)
       })
