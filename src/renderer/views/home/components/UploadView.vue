@@ -180,6 +180,7 @@
           title: undefined,
           description: undefined
         }
+        this.$emit('closed')
       }
     }
   }

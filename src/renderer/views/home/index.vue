@@ -9,7 +9,7 @@
         <user-info-view />
 
         <el-tabs v-model="platform" stretch @tab-click="switchPlatform">
-          <el-tab-pane name="Android" :disabled="testing">
+          <el-tab-pane name="Android" :disabled="testing || true">
             <span slot="label"><svg-icon icon-class="android-logo" /> Android</span>
           </el-tab-pane>
           <el-tab-pane name="iOS" :disabled="testing">
@@ -48,7 +48,7 @@
       </el-main>
 
       <upload-view :platform="platform" :device-info="deviceInfo" :package-info="app ? app : undefined" :performance-data="performanceData"
-                   :show="showUploadDialog" @success="showUploadDialog = false"/>
+                   :show="showUploadDialog" @success="showUploadDialog = false" @closed="showUploadDialog = false"/>
     </el-container>
   </div>
 </template>
