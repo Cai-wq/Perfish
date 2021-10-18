@@ -2,7 +2,17 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>PerfFish</title>
+    <script>
+      let title = 'PerfFish'
+      if (process.env.NODE_ENV !== 'development') {
+        const path = require('path')
+        const distDir = path.dirname(__dirname)
+        const appDir = path.dirname(distDir)
+        const packageJson = require(path.join(appDir, 'package.json'))
+        title += ' (v' + packageJson.version + ')'
+      }
+      document.write('<title>' + title + '</title>')
+    </script>
     <% if (htmlWebpackPlugin.options.nodeModules) { %>
       <!-- Add `node_modules/` to global paths so `require` works properly in development -->
       <script>
