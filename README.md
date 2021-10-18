@@ -1,10 +1,8 @@
-# electron-vue-admin
+# PerfFish
 
-> An electron-vue project
+> 移动端性能测试工具desktop
 
-This is a vue electron admin project base on  [vueAdmin-template](https://github.com/PanJiaChen/vueAdmin-template) , and was generated from [electron-vue](https://github.com/SimulatedGREG/electron-vue) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about this project can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
-
-## Build Setup
+## 快速上手
 
 ``` bash
 # install dependencies
@@ -24,13 +22,16 @@ npm run pack
 ```
 ---
 
+## 简介
 
-## Demo
+基于Electron实现的可视化移动端APP性能测试工具
 
-![](https://github.com/PanJiaChen/PanJiaChen.github.io/blob/master/images/electron-login.png)
+云端看板：[海王平台-性能测试报告](http://poseidon.183me.com/#/mobile-platform/performance/report)
 
-![](https://github.com/PanJiaChen/PanJiaChen.github.io/blob/master/images/electron-admin.gif)
+![](https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/all/boxcn04CAkBzem0z3Rg4q81gike/?mount_node_token=doccnaisDEsAk8rgrpChDofr4Tb&mount_point=doc_image)
 
+[指引文档](https://lizhi2021.feishu.cn/wiki/wikcnCtxxIx431VbGA8DChT5PLh)
 
-## Download
-Mac: [app release](https://github.com/PanJiaChen/electron-vue-admin/releases/tag/v3.0.0)
+## 更新日志
+
+[https://lizhi2021.feishu.cn/wiki/wikcnv3lchkJ4eivL7DVdbKTqIb](https://lizhi2021.feishu.cn/wiki/wikcnv3lchkJ4eivL7DVdbKTqIb)
