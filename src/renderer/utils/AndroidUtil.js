@@ -9,14 +9,7 @@ import path from 'path'
  * 获取adb路径
  */
 export function getAdbPath() {
-  let distDir
-  if (process.env.NODE_ENV === 'development') {
-    distDir = process.cwd()
-  } else {
-    // eslint-disable-next-line no-undef
-    distDir = path.dirname(__static)
-  }
-  const adb = path.join(distDir, 'pydist', 'adb')
+  const adb = path.join(__static, 'adb')
   // const chmod = cmd.runSync('[ -w ' + adb + ' ] && echo "adb yes" || chmod 777 ' + adb)
   const chmod = cmd.runSync('chmod 777 ' + adb)
   if (chmod.err) {

@@ -23,14 +23,7 @@ export let serverState = StateEnum.OFFLINE
 const registerMonitorList = []
 
 function execFilePath() {
-  let distDir
-  if (process.env.NODE_ENV === 'development') {
-    distDir = process.cwd()
-  } else {
-    // eslint-disable-next-line no-undef
-    distDir = path.dirname(__static)
-  }
-  return path.join(distDir, 'pydist', 'InstrumentsServer')
+  return path.join(__static, 'InstrumentsServer')
 }
 
 /**
@@ -48,7 +41,7 @@ export function init() {
   }
   return new Promise((res, rej) => {
     new Promise((resolve, reject) => {
-      console.log('python文件地址', execFilePath())
+      console.log('InstrumentsServer文件地址', execFilePath())
       if (!fs.existsSync(serviceLogDir)) {
         fs.mkdirSync(serviceLogDir)
       }

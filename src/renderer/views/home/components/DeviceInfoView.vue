@@ -8,7 +8,7 @@
 </template>
 
 <script>
-  import { getIosDeviceInfo } from '@/views/performance/service/iOSService'
+  import { getIosDeviceInfo } from '@/performance/iOSService'
   import { getAndroidDeviceInfo } from '@/utils/AndroidUtil'
 
   export default {

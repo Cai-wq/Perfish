@@ -23,25 +23,11 @@ export let serverState = StateEnum.OFFLINE
 const registerMonitorList = []
 
 function execFilePath() {
-  let distDir
-  if (process.env.NODE_ENV === 'development') {
-    distDir = process.cwd()
-  } else {
-    // eslint-disable-next-line no-undef
-    distDir = path.resolve(`${__static}`, '..')
-  }
-  return path.join(distDir, 'pydist', 'AdbPerfServer')
+  return path.join(__static, 'AdbPerfServer')
 }
 
 function configFilePath() {
-  let distDir
-  if (process.env.NODE_ENV === 'development') {
-    distDir = process.cwd()
-  } else {
-    // eslint-disable-next-line no-undef
-    distDir = path.resolve(`${__static}`, '..')
-  }
-  return path.join(distDir, 'pydist', 'config.conf')
+  return path.join(__static, 'config.conf')
 }
 
 function outputPath() {

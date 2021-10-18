@@ -1,6 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import cmd from 'node-cmd'
-// import fixPath from 'fix-path'
 
 // 日志
 const logger = require('electron-log')
@@ -13,7 +12,7 @@ Object.assign(console, logger.functions)
  */
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
-  // fixPath()
+  // require('fix-path').default()
   process.env.PATH = [
     './node_modules/.bin',
     '/.nodebrew/current/bin',
@@ -28,6 +27,8 @@ if (process.env.NODE_ENV !== 'development') {
     '/Library/Frameworks/Python.framework/Versions/3.9/bin',
     process.env.PATH
   ].join(':')
+} else {
+  global.__static = require('path').join(process.cwd(), 'static')
 }
 
 let mainWindow

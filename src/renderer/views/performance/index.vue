@@ -43,7 +43,7 @@
 
 <script>
   import PerformanceChart from './components/PerformanceChart'
-  import { PerformanceManager } from './service/PerformanceManager'
+  import { PerformanceManager } from '@/performance/PerformanceManager'
 
   export default {
     name: 'PerformancePage',
