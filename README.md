@@ -4,21 +4,28 @@
 
 ## 快速上手
 
-``` bash
-# install dependencies
-npm install
+### 开发环境
+```bash
+# 安装依赖（必须加后面的 --registry ，明确使用公司私有仓库。否则会导致用例编辑器依赖拉不下来）
+npm install --registry=http://npm.lizhifm.com
 
 # serve with hot reload at localhost:9080
 npm run dev
+```
 
-# build electron app for production
+### 发布
+```bash
+# 打正式包
 npm run build
+```
 
-# lint all JS/Vue component files in `app/src`
+### 其他
+```bash
+# 代码格式检查
 npm run lint
 
-# run webpack in production
-npm run pack
+# 代码格式检查并自动修复
+npm run lint -- --fix
 ```
 ---
 
