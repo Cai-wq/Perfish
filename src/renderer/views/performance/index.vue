@@ -9,15 +9,9 @@
       <svg v-if="!running" class="svg-logo" aria-hidden="true" v-on="$listeners" @click="startTest">
         <use :xlink:href="`#icon-play`" />
       </svg>
-      <!--      <svg class="svg-logo" aria-hidden="true" v-on="$listeners">-->
-      <!--        <use :xlink:href="`#icon-play2`" />-->
-      <!--      </svg>-->
       <svg v-else class="svg-logo" aria-hidden="true" v-on="$listeners" @click="stopTest">
         <use :xlink:href="`#icon-stop`" />
       </svg>
-      <!--      <svg class="svg-logo" aria-hidden="true" v-on="$listeners">-->
-      <!--        <use :xlink:href="`#icon-stop3`" />-->
-      <!--      </svg>-->
     </div>
 
     <div class="perf-chart-view">

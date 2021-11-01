@@ -13,6 +13,9 @@
         <el-dropdown-item>
           <el-link :underline="false" @click="openPoseidon">海王平台</el-link>
         </el-dropdown-item>
+        <el-dropdown-item>
+          <el-link :underline="false" @click="openDocs">指引文档</el-link>
+        </el-dropdown-item>
         <router-link class="inlineBlock" to="/settings">
           <el-dropdown-item>
             设置
@@ -39,6 +42,9 @@
     methods: {
       openPoseidon() {
         shell.openExternal('http://poseidon.183me.com')
+      },
+      openDocs() {
+        shell.openExternal('https://lizhi2021.feishu.cn/wiki/wikcnZdSutJ01cAOiQ7EtgYGeub')
       },
       async logout() {
         await this.$store.dispatch('user/ssoLogout')
