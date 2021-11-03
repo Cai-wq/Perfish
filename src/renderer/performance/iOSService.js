@@ -7,6 +7,7 @@ import child_process from 'child_process'
 import path from 'path'
 import fs from 'fs'
 import cmd from 'node-cmd'
+import store from '../store'
 import { Message } from 'element-ui'
 import { StateEnum } from './constant'
 
@@ -211,7 +212,7 @@ export function getIosDeviceInfo(deviceId) {
 }
 
 /**
- * 获取本地设备列表
+ * 获取本地设备APP列表
  * @returns {Promise<unknown>}
  */
 export function getIosAppList(deviceId) {
@@ -223,6 +224,15 @@ export function getIosAppList(deviceId) {
       if (error) {
         reject('get_app_list失败, error=' + error)
       }
+      res.sort((x, y) => {
+        if (store.getters.performance.cacheApp.iOS === x.packageName) {
+          return -1
+        }
+        if (store.getters.performance.cacheApp.iOS === y.packageName) {
+          return 1
+        }
+        return 0
+      })
       resolve(res)
     })
   })

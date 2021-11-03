@@ -2,6 +2,7 @@
  * Android工具类
  * Created by CaiWeiQi on 2021/9/3
  */
+import store from '../store'
 import cmd from 'node-cmd'
 import path from 'path'
 
@@ -23,6 +24,13 @@ export function getAdbPath() {
  */
 export function adbExec(command) {
   return cmd.runSync(getAdbPath() + ' ' + command)
+}
+
+/**
+ * 获取aapt路径
+ */
+export function getAaptPath() {
+  return path.join(__static, 'aapt')
 }
 
 /**
@@ -98,15 +106,83 @@ export function getAndroidApplications(deviceId) {
     data.split(/[(\r\n)\r\n]+/).forEach((value) => {
       if (value && value.trim() !== '') {
         const packageName = value.replace('package:', '').trim()
+        let appName = store.getters.performance.applicationMap[packageName]
+        appName = appName && appName !== '' ? appName : packageName
         appList.push({
-          name: packageName,
+          name: appName,
           packageName: packageName,
           version: null
         })
       }
     })
+    appList.sort((x, y) => {
+      if (x.name !== x.packageName) {
+        return -1
+      }
+      if (y.name !== y.packageName) {
+        return 1
+      }
+      return 0
+    })
+    appList.sort((x, y) => {
+      if (store.getters.performance.cacheApp.Android === x.packageName) {
+        return -1
+      }
+      if (store.getters.performance.cacheApp.Android === y.packageName) {
+        return 1
+      }
+      return 0
+    })
   }
   return appList
+}
+
+/**
+ * 获取APP名
+ */
+export function getAndroidAppName(deviceId, packageName) {
+  let name = packageName
+  if (!deviceId || deviceId === '' || !packageName || packageName === '') {
+    return name
+  }
+  try {
+    const pushResult = adbExec('-s ' + deviceId + ' shell [ -x /data/local/tmp/aapt-arm-pie ] && echo "true" || ' +
+      getAdbPath() + ' -s ' + deviceId + ' push ' + getAaptPath() + ' /data/local/tmp && ' +
+      getAdbPath() + ' -s ' + deviceId + ' shell chmod 0755 /data/local/tmp/aapt-arm-pie')
+    if (pushResult.err) {
+      console.error('推送aapt至手机失败, err=' + pushResult.err)
+    }
+
+    const apkResult = adbExec(
+      '-s ' + deviceId + ' shell pm list packages -3 -f ' + packageName + ' | grep ' + packageName + '- | head -1')
+    if (apkResult.err) {
+      console.error('获取设备apk路径失败, err=' + apkResult.err)
+    }
+    let apkPath = apkResult.data.replace('package:', '')
+    apkPath = apkPath.substring(0, apkPath.lastIndexOf('='))
+    if (!apkPath || apkPath === '') {
+      return name
+    }
+
+    const dumpResult = adbExec(
+      '-s ' + deviceId + ' shell /data/local/tmp/aapt-arm-pie d badging ' + apkPath)
+    const { err, data } = dumpResult
+    if (err) {
+      console.error('dump apk信息失败, err=' + err)
+    }
+    for (const line of data.split('\n')) {
+      if (line.startsWith('application-label:')) {
+        const arr = line.trim().split("'")
+        if (arr.length > 1) {
+          name = arr[1]
+          break
+        }
+      }
+    }
+  } catch (e) {
+    console.error('获取APP名失败', e)
+  }
+  return name && name !== '' ? name : packageName
 }
 
 /**

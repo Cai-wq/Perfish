@@ -27,7 +27,8 @@
             <span><strong>{{ item.name }}</strong> ({{ item.udid }})</span>
           </el-option>
         </el-select>
-        <el-select v-model="app" value-key="packageName" placeholder="请选择测试应用" filterable default-first-option style="width: 100%" :disabled="testing" @visible-change="updateAppList">
+        <el-select v-model="app" value-key="packageName" placeholder="请选择测试应用" filterable default-first-option
+                   style="width: 100%" :disabled="testing || !device || !device.udid" @visible-change="updateAppList" @change="chooseApp">
           <el-option
               v-for="item in appList"
               :key="item.packageName"
@@ -63,7 +64,7 @@
   import PerformancePage from '@/views/performance'
   import { getIosDeviceList, getIosAppList } from '@/performance/iOSService'
   import { checkIosDepend } from '@/utils/iosUtil'
-  import { checkAndroidDepend, getAndroidDevices, getAndroidApplications } from '@/utils/AndroidUtil'
+  import { checkAndroidDepend, getAndroidDevices, getAndroidApplications, getAndroidAppName } from '@/utils/AndroidUtil'
   import { PerformanceManager } from '@/performance/PerformanceManager'
   import { ipcRenderer } from 'electron'
 
@@ -173,6 +174,19 @@
           }).catch(e => {
             this.appList = []
           })
+        }
+      },
+      chooseApp(app) {
+        if (!app || !app.packageName || !app.name) {
+          return
+        }
+        this.$store.dispatch('performance/setCacheApp', { platform: this.platform, packageName: app.packageName })
+        if (this.platform === 'Android' && app.packageName === app.name) {
+          const appName = getAndroidAppName(this.device.udid, app.packageName)
+          if (appName && appName !== app.packageName) {
+            app.name = appName
+            this.$store.dispatch('performance/addApplicationMap', { packageName: app.packageName, appName: appName })
+          }
         }
       },
       onTesting(val) {

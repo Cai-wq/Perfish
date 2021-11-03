@@ -13,6 +13,7 @@ const getters = {
     }
   },
   roles: state => state.user.roles,
-  platform: state => state.performance.platform
+  platform: state => state.performance.platform,
+  performance: state => state.performance
 }
 export default getters
