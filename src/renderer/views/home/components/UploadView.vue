@@ -104,7 +104,7 @@
         formRules: {
           title: [
             { required: true, message: '请输入报告标题', trigger: 'blur' },
-            { min: 3, max: 200, message: '标题长度不能超过200字符', trigger: 'blur' }
+            { min: 3, max: 200, message: '标题长度限制3~200字符', trigger: 'blur' }
           ],
           description: [
             { max: 255, message: '备注长度不能超过255字符', trigger: 'blur' }
