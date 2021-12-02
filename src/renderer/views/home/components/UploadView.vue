@@ -50,7 +50,7 @@
 
 <script>
   import { uploadPerformanceInfo } from '@/api/poseidon'
-  import { getAppBuildVersion as androidBuildVersion } from '@/utils/AndroidUtil'
+  import { getAppVersion as androidVersion, getAppBuildVersion as androidBuildVersion } from '@/utils/AndroidUtil'
   import { formatElapsedTime, isNumber } from '@/utils'
 
   export default {
@@ -133,6 +133,9 @@
       }
     },
     methods: {
+      getAppVersion(deviceId, packageName) {
+        return this.platform === 'Android' ? androidVersion(deviceId, packageName) : this.packageInfo.version
+      },
       getAppBuildVersion(deviceId, packageName) {
         return this.platform === 'Android' ? androidBuildVersion(deviceId, packageName) : this.packageInfo.buildNum
       },
@@ -158,7 +161,7 @@
               packageInfo: {
                 applicationName: this.packageInfo.name,
                 packageName: this.packageInfo.packageName,
-                version: this.packageInfo.version,
+                version: this.getAppVersion(deviceId, this.packageInfo.packageName),
                 buildNum: this.getAppBuildVersion(deviceId, this.packageInfo.packageName)
               },
               performanceData: this.performanceData.data,

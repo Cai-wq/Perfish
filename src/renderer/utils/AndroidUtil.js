@@ -186,6 +186,24 @@ export function getAndroidAppName(deviceId, packageName) {
 }
 
 /**
+ * 获取APP版本
+ */
+export function getAppVersion(deviceId, packageName) {
+  let buildVersion = ''
+  if (!deviceId || deviceId === '' || !packageName || packageName === '') {
+    return buildVersion
+  }
+  const result = adbExec('-s ' + deviceId + ' shell dumpsys package ' + packageName + ' | grep versionName | awk \'{print $1}\' | awk -F= \'{print $2}\'')
+  const { err, data } = result
+  if (err) {
+    console.error('获取Android应用版本号失败, err=' + err)
+  } else {
+    buildVersion = data.trim()
+  }
+  return buildVersion
+}
+
+/**
  * 获取应用Build号
  */
 export function getAppBuildVersion(deviceId, packageName) {
@@ -198,7 +216,7 @@ export function getAppBuildVersion(deviceId, packageName) {
   if (err) {
     console.error('获取Android应用Build号失败, err=' + err)
   } else {
-    buildVersion = data
+    buildVersion = data.trim()
   }
   return buildVersion
 }
