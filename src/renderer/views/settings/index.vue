@@ -24,7 +24,7 @@
         formRules: {
           userName: [
             { required: true, message: '请输入姓名', trigger: 'blur' },
-            { min: 2, max: 8, message: '姓名长度不能超过8字符', trigger: 'blur' }
+            { min: 2, max: 8, message: '姓名长度限制2~8字符', trigger: 'blur' }
           ]
         }
       }
