@@ -58,6 +58,34 @@ export function formatTime(time, option) {
 }
 
 /**
+ * 格式化时间差，格式为{HH:MM:SS}
+ * @param start 开始时间
+ * @param end   结束时间
+ * @returns {string}
+ */
+export function formatElapsedTime(start, end) {
+  const dateDiff = end - start
+  const leave1 = dateDiff % (24 * 3600 * 1000)
+  let hours = Math.floor(leave1 / (3600 * 1000))
+  hours = hours < 10 ? '0' + hours : hours
+  const leave2 = leave1 % (3600 * 1000)
+  let minutes = Math.floor(leave2 / (60 * 1000))
+  minutes = minutes < 10 ? '0' + minutes : minutes
+  const leave3 = leave2 % (60 * 1000)
+  let seconds = Math.round(leave3 / 1000)
+  seconds = seconds < 10 ? '0' + seconds : seconds
+  return hours + ':' + minutes + ':' + seconds
+}
+
+/**
+ * 格式化时间差，格式为{HH:MM:SS}
+ * @param start 开始时间
+ */
+export function formatCurrentElapsedTime(start) {
+  return formatElapsedTime(start, new Date().getTime())
+}
+
+/**
  * @param {Function} func
  * @param {number} wait
  * @param {boolean} immediate
@@ -96,5 +124,9 @@ export function debounce(func, wait, immediate) {
 
     return result
   }
+}
+
+export function isNumber(val) {
+  return typeof val === 'number' && !isNaN(val)
 }
 

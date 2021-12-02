@@ -4,13 +4,18 @@
       :element-loading-text="initializing ? '环境准备中' : '系统处理中, 请稍后, 不要重复操作'"
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.5)">
-    <h3 style="float: left">移动端性能测试</h3>
-    <div style="float: right; cursor: pointer;">
-      <svg v-if="!running" class="svg-logo" aria-hidden="true" v-on="$listeners" @click="startTest">
-        <use :xlink:href="`#icon-play`" />
-      </svg>
-      <svg v-else class="svg-logo" aria-hidden="true" v-on="$listeners" @click="stopTest">
+    <h3 class="head-title">移动端性能测试</h3>
+    <div v-if="running" class="head-operation">
+      <span class="elapsed-time">
+        {{ elapsedTime }}
+      </span>
+      <svg class="svg-logo" aria-hidden="true" v-on="$listeners" @click="stopTest">
         <use :xlink:href="`#icon-stop`" />
+      </svg>
+    </div>
+    <div v-else class="head-operation">
+      <svg class="svg-logo" aria-hidden="true" v-on="$listeners" @click="startTest">
+        <use :xlink:href="`#icon-play`" />
       </svg>
     </div>
 
@@ -38,6 +43,7 @@
 <script>
   import PerformanceChart from './components/PerformanceChart'
   import { PerformanceManager } from '@/performance/PerformanceManager'
+  import { formatCurrentElapsedTime } from '@/utils'
 
   export default {
     name: 'PerformancePage',
@@ -81,6 +87,7 @@
         timer: null,
         startTime: null,
         endTime: null,
+        elapsedTime: '00:02:33',
         cpuData: {},
         memoryData: {},
         fpsData: {}
@@ -91,6 +98,7 @@
     },
     methods: {
       startTest() {
+        this.elapsedTime = '00:00:00'
         this.resetDataMap()
         if (!this.deviceId || this.deviceId === '') {
           this.$message.error('请先选择测试设备及应用')
@@ -150,6 +158,7 @@
                 this.memoryData.detail[key].data.push(item.data)
               })
             })
+            this.getElapsedTime()
           }, 1000)
         }).catch(error => {
           console.error('Start失败, error=', error)
@@ -209,23 +218,48 @@
             }
           }
         }
+      },
+      getElapsedTime() {
+        this.elapsedTime = formatCurrentElapsedTime(this.startTime)
       }
     }
   }
 </script>
 
 <style lang="scss" scoped>
-  .svg-logo {
-    width: 48px;
-    height: 48px;
-    padding: 3px 3px;
-    margin-top: 5px;
-    margin-right: 7px;
-    /*float: left;*/
-    /*padding-right: 1em;*/
-    /*vertical-align: -0.15em;*/
-    /*fill: currentColor;*/
-    /*overflow: hidden;*/
+
+  .head-title {
+    float: left;
+  }
+
+  .head-operation {
+    float: right;
+    display: flex;
+    justify-content: space-between;
+
+    .elapsed-time {
+      font-size: 24px;
+      text-align: center;
+      display: block;
+      margin-block-start: 12px;
+      margin-block-end: 12px;
+      font-weight: bold;
+    }
+
+    .svg-logo {
+      cursor: pointer;
+      width: 48px;
+      height: 48px;
+      padding: 3px 3px;
+      margin-top: 5px;
+      margin-left: 10px;
+      margin-right: 7px;
+      /*float: left;*/
+      /*padding-right: 1em;*/
+      /*vertical-align: -0.15em;*/
+      /*fill: currentColor;*/
+      /*overflow: hidden;*/
+    }
   }
 
   .perf-chart-view {

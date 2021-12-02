@@ -23,6 +23,9 @@
         <el-form-item label="测试APP" prop="packageName">
           <el-input v-model="packageInfo.packageName" disabled />
         </el-form-item>
+        <el-form-item label="测试时长" prop="elapsedTime">
+          <el-input v-model="elapsedTime" disabled />
+        </el-form-item>
         <el-form-item label="性能数据" prop="classify">
           <el-checkbox-group v-model="uploadForm.classify" :min="3" :max="3">
             <el-checkbox
@@ -48,6 +51,7 @@
 <script>
   import { uploadPerformanceInfo } from '@/api/poseidon'
   import { getAppBuildVersion as androidBuildVersion } from '@/utils/AndroidUtil'
+  import { formatElapsedTime, isNumber } from '@/utils'
 
   export default {
     name: 'UploadView',
@@ -110,6 +114,14 @@
             { max: 255, message: '备注长度不能超过255字符', trigger: 'blur' }
           ]
         }
+      }
+    },
+    computed: {
+      elapsedTime() {
+        if (isNumber(this.performanceData.startTime) && isNumber(this.performanceData.endTime)) {
+          return formatElapsedTime(this.performanceData.startTime, this.performanceData.endTime)
+        }
+        return '00:00:00'
       }
     },
     watch: {

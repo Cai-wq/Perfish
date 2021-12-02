@@ -13,6 +13,14 @@ npm install --registry=http://npm.lizhifm.com
 npm run dev
 ```
 
+### FQA
+1. 若dev启动后报错Node.js版本问题，如
+```
+XXX Node.js version using NODE_MODULE_VERSION XX. This version of Node.js requires NODE_MODULE_VERSION XX. Please try re-compiling or re-installing the module (dor instance, using `npm rebuild` or `npm install`).
+```
+
+* 执行`npm run rebuild`，再重启即可解决
+
 ### 发布
 ```bash
 # 打正式包
