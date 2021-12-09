@@ -13,6 +13,8 @@ import store from './store'
 import '@/icons' // icon
 import '@/permission' // permission control
 import cmdPlugin from './utils/CmdPlugins'
+import db from '../main/datastore'
+import { remote } from 'electron'
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 
@@ -28,6 +30,8 @@ new Vue({
 }).$mount('#app')
 
 Vue.use(cmdPlugin)
+Vue.prototype.$db = db
+Vue.prototype.$shareObject = remote.getGlobal('shareObject')
 
 // 日志
 const logger = require('electron-log')

@@ -31,7 +31,7 @@ function configFilePath() {
 }
 
 function outputPath() {
-  return path.join(path.dirname(logger.transports.file.getFile().path), 'AdbPerfServer_output')
+  return path.join(require('electron').remote.getGlobal('shareObject').logFileDir, 'AdbPerfServer_output')
 }
 
 /**

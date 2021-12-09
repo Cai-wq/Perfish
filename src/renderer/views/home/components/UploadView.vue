@@ -42,6 +42,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="submitUpload">立即上传</el-button>
+          <el-button type="success" @click="saveToLocal">保存本地</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -52,6 +53,8 @@
   import { uploadPerformanceInfo } from '@/api/poseidon'
   import { getAppVersion as androidVersion, getAppBuildVersion as androidBuildVersion } from '@/utils/AndroidUtil'
   import { formatElapsedTime, isNumber } from '@/utils'
+  import { getHashCode } from '@/utils/StringUtil'
+  import { writeJsonSync } from 'fs-extra'
 
   export default {
     name: 'UploadView',
@@ -180,6 +183,48 @@
             }).finally(() => {
               this.uploading = false
             })
+          } else {
+            return false
+          }
+        })
+      },
+      saveToLocal() {
+        this.$refs.uploadForm.validate((valid) => {
+          if (valid) {
+            this.uploading = true
+            const deviceId = this.deviceInfo.UDID
+            const perfDetailId = getHashCode(
+              deviceId + this.packageInfo.packageName + this.performanceData.startTime + this.performanceData.endTime)
+            const jsonFile = this.$shareObject.perfDataPath + '/' + perfDetailId + '.json'
+            const data = {
+              platform: this.platform,
+              title: this.uploadForm.title.trim(),
+              description: this.uploadForm.description,
+              deviceId: deviceId,
+              deviceInfo: {
+                devices: [{
+                  devicePlatform: this.platform,
+                  deviceName: this.deviceInfo.DeviceName,
+                  udid: deviceId,
+                  osVersion: this.deviceInfo.OSVersion
+                }]
+              },
+              packageName: this.packageInfo.packageName,
+              packageInfo: {
+                applicationName: this.packageInfo.name,
+                packageName: this.packageInfo.packageName,
+                version: this.getAppVersion(deviceId, this.packageInfo.packageName),
+                buildNum: this.getAppBuildVersion(deviceId, this.packageInfo.packageName)
+              },
+              perfDetailFile: jsonFile,
+              author: this.$store.getters.userInfo.name,
+              startTime: this.performanceData.startTime,
+              endTime: this.performanceData.endTime
+            }
+            writeJsonSync(jsonFile, this.performanceData.data)
+            this.$db.get(this.platform).push(data).write()
+            this.uploading = false
+            this.$emit('success')
           } else {
             return false
           }

@@ -1,10 +1,15 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import cmd from 'node-cmd'
+import path from 'path'
 
 // 日志
 const logger = require('electron-log')
 logger.transports.console.level = 'silly'
 Object.assign(console, logger.functions)
+global.shareObject = {
+  logFileDir: path.dirname(logger.transports.file.getFile().path),
+  perfDataPath: path.join(app.getPath('userData'), 'performance')
+}
 
 /**
  * Set `__static` path to static files in production
