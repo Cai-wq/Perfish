@@ -8,6 +8,7 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '../views/layout/Layout'
+import { ipcRenderer } from 'electron'
 
 /**
 * hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
@@ -30,7 +31,6 @@ export const constantRouterMap = [
     component: Layout,
     redirect: '/home',
     name: 'HomePage',
-    hidden: true,
     children: [{
       path: 'home',
       component: () => import('@/views/home/index')
@@ -43,12 +43,39 @@ export const constantRouterMap = [
     component: () => import('@/views/settings/index')
   },
 
+  {
+    path: '/report',
+    component: Layout,
+    name: 'ReportPage',
+    children: [{
+      name: 'LocalReportListPage',
+      path: 'list',
+      meta: { title: '列表', icon: 'form' },
+      component: () => import('@/views/performance/report/list')
+    },
+    {
+      name: 'LocalReportPage',
+      path: 'detail',
+      hidden: true,
+      props: router => ({
+        infoData: router.query.infoData
+      }),
+      component: () => import('@/views/performance/report/detail')
+    }]
+  },
+
   { path: '*', redirect: '/404', hidden: true }
 ]
 
-export default new Router({
+const router = new Router({
   // mode: 'history', //后端支持可开
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRouterMap
 })
+export default router
 
+ipcRenderer.on('href', (event, args) => {
+  if (args) {
+    router.push({ name: args })
+  }
+})

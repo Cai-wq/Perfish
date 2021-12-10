@@ -7,8 +7,6 @@
     <el-container>
       <!-- 左边菜单 -->
       <el-aside>
-        <user-info-view />
-
         <el-tabs v-model="platform" stretch @tab-click="switchPlatform">
           <el-tab-pane name="Android" :disabled="testing">
             <span slot="label"><svg-icon icon-class="android-logo" /> Android</span>
@@ -58,7 +56,6 @@
 </template>
 
 <script>
-  import UserInfoView from './components/UserInfoView'
   import DeviceInfoView from './components/DeviceInfoView'
   import UploadView from './components/UploadView'
   import PerformancePage from '@/views/performance'
@@ -71,14 +68,13 @@
   export default {
     name: 'HomePage',
     components: {
-      UserInfoView,
       DeviceInfoView,
       UploadView,
       PerformancePage
     },
     data() {
       return {
-        platform: 'iOS',
+        platform: 'Android',
         deviceList: [],
         device: {
           udid: undefined,

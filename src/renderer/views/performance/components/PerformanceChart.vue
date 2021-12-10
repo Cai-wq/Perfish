@@ -1,12 +1,22 @@
 <template>
   <div>
+    <el-row v-if="overviewData.key && overviewData.key !== ''">
+      <el-col :span="4">
+        <h4>{{ overviewData.key + '均值' }}</h4>
+        <h1>{{ overviewData.avg.toFixed(2) }} {{ overviewData.unit }}</h1>
+      </el-col>
+      <el-col :span="4">
+        <h4>{{ overviewData.key + '峰值' }}</h4>
+        <h1>{{ overviewData.max.toFixed(2) }} {{ overviewData.unit }}</h1>
+      </el-col>
+    </el-row>
     <div ref="chart" style="height: 250px" />
   </div>
 </template>
 
 <script>
   import echarts from 'echarts'
-  import ChartResize from '../../layout/mixin/ChartResize'
+  import ChartResize from '@/views/layout/mixin/ChartResize'
 
   export default {
     name: 'PerformanceChart',
@@ -15,6 +25,24 @@
       chartData: {
         type: Object,
         required: true
+      },
+      reportMode: {
+        type: Boolean,
+        default() {
+          return false
+        }
+      },
+      overviewData: {
+        type: Object,
+        require: false,
+        default() {
+          return {
+            key: '',
+            unit: '',
+            avg: 0,
+            max: 0
+          }
+        }
       }
     },
     data() {
@@ -26,7 +54,7 @@
       chartData: {
         deep: true,
         handler(val) {
-          // console.error('收到图表数据=' + JSON.stringify(val))
+          // console.error('更新图表数据=' + JSON.stringify(val))
           if (val.detail && Object.keys(val.detail).length !== 0) {
             this.setOptions(val)
           }
@@ -36,6 +64,9 @@
     mounted() {
       this.$nextTick(() => {
         this.initChart()
+        if (this.reportMode && this.chartData) {
+          this.setOptions(this.chartData)
+        }
       })
     },
     beforeDestroy() {

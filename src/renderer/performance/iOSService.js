@@ -15,7 +15,7 @@ import log from 'electron-log'
 const logger = log.create('InstrumentsServerLog')
 logger.transports.file.fileName = 'InstrumentsServer.log'
 logger.transports.console.level = process.env.NODE_ENV === 'development' ? 'silly' : false
-const serviceLogDir = path.join(path.dirname(logger.transports.file.getFile().path), 'instrumentsCaller_logs')
+const serviceLogDir = path.join(require('electron').remote.getGlobal('shareObject').logFileDir, 'instrumentsCaller_logs')
 
 const serverPort = 24242
 let pythonProcess = null

@@ -20,17 +20,13 @@ service.defaults.withCredentials = true
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-    // 开始 接入SSO单点登录
     config.headers['X-Requested-With'] = 'XMLHttpRequest'
     config.withCredentials = true
 
     if (getToken()) {
-      // 后端smart-sso-client 1.0.5 以上支持X-SSO-Authorization
       config.headers['X-SSO-Authorization'] = getToken()
-      // 旧版本还是通过Cookie传token
       config.headers['token'] = getToken()
     }
-    // 结束 接入SSO单点登录
     return config
   },
   error => {

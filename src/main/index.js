@@ -1,10 +1,15 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, MenuItem } from 'electron'
 import cmd from 'node-cmd'
+import path from 'path'
 
 // 日志
 const logger = require('electron-log')
 logger.transports.console.level = 'silly'
 Object.assign(console, logger.functions)
+global.shareObject = {
+  logFileDir: path.dirname(logger.transports.file.getFile().path),
+  perfDataPath: path.join(app.getPath('userData'), 'performance')
+}
 
 /**
  * Set `__static` path to static files in production
@@ -77,7 +82,10 @@ if (!app.requestSingleInstanceLock()) {
       }
     }
   })
-  app.on('ready', createWindow)
+  app.on('ready', () => {
+    createWindow()
+    appMenu()
+  })
 }
 
 app.on('window-all-closed', () => {
@@ -111,6 +119,31 @@ app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
  */
+
+// 菜单栏
+function appMenu() {
+  const menu = new Menu()
+  menu.append(Menu.getApplicationMenu().items[0])
+  menu.append(
+    new MenuItem(
+      {
+        label: '性能测试',
+        submenu: [{
+          label: '开始测试',
+          click() {
+            mainWindow.webContents.send('href', 'HomePage')
+          }
+        },
+        {
+          label: '测试报告',
+          click() {
+            mainWindow.webContents.send('href', 'LocalReportListPage')
+          }
+        }]
+      })
+  )
+  Menu.setApplicationMenu(menu)
+}
 
 // 监听手动退出事件
 ipcMain.on('SafeExit', (event, args) => {

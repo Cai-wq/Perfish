@@ -1,6 +1,6 @@
 {
-  "name": "perf-fish",
-  "version": "1.1.4",
+  "name": "perfish",
+  "version": "1.1.5",
   "author": "蔡伟琪 <caiweiqi@lizhi.fm>",
   "description": "移动端性能测试工具",
   "license": "MIT",
@@ -20,7 +20,7 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "PerfFish",
+    "productName": "Perfish",
     "appId": "fm.lizhi.testing.perfish",
     "directories": {
       "output": "build"
@@ -60,7 +60,9 @@
     "electron-log": "^4.4.1",
     "element-ui": "2.8.2",
     "fix-path": "^4.0.0",
+    "fs-extra": "^8.1.0",
     "js-cookie": "^2.2.0",
+    "lowdb": "^0.17.0",
     "node-cmd": "^5.0.0",
     "normalize.css": "7.0.0",
     "nprogress": "0.2.0",

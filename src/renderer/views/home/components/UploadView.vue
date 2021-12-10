@@ -41,7 +41,7 @@
           <el-input type="textarea" maxlength="255" show-word-limit :autosize="{ minRows: 3, maxRows: 6}" v-model="uploadForm.description" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitUpload">立即上传</el-button>
+          <el-button type="success" @click="saveToLocal">保存本地</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -49,9 +49,10 @@
 </template>
 
 <script>
-  import { uploadPerformanceInfo } from '@/api/poseidon'
   import { getAppVersion as androidVersion, getAppBuildVersion as androidBuildVersion } from '@/utils/AndroidUtil'
-  import { formatElapsedTime, isNumber } from '@/utils'
+  import { formatElapsedTime, isNumber, parseCurrentTime } from '@/utils'
+  import { getHashCode } from '@/utils/StringUtil'
+  import { writeJSONSync } from 'fs-extra'
 
   export default {
     name: 'UploadView',
@@ -139,19 +140,27 @@
       getAppBuildVersion(deviceId, packageName) {
         return this.platform === 'Android' ? androidBuildVersion(deviceId, packageName) : this.packageInfo.buildNum
       },
-      submitUpload() {
+      saveToLocal() {
         this.$refs.uploadForm.validate((valid) => {
           if (valid) {
             this.uploading = true
             const deviceId = this.deviceInfo.UDID
+            const perfId = getHashCode(
+              deviceId + this.packageInfo.packageName + this.performanceData.startTime + this.performanceData.endTime)
+            const jsonFile = this.$shareObject.perfDataPath + '/' + perfId + '.json'
+            const overviewData = {
+              CPU: this.computeOverView(this.performanceData.data, 'CPU', 'AppAllCpu'),
+              FPS: this.computeOverView(this.performanceData.data, 'FPS', 'FPS'),
+              Memory: this.computeOverView(this.performanceData.data, 'Memory', this.platform === 'Android' ? 'PSS' : 'XcodeMemory')
+            }
             const data = {
-              platform: this.platform.toLowerCase(),
+              platform: this.platform,
               title: this.uploadForm.title.trim(),
               description: this.uploadForm.description,
               deviceId: deviceId,
               deviceInfo: {
                 devices: [{
-                  devicePlatform: this.platform.toLowerCase(),
+                  devicePlatform: this.platform,
                   deviceName: this.deviceInfo.DeviceName,
                   udid: deviceId,
                   osVersion: this.deviceInfo.OSVersion
@@ -164,26 +173,38 @@
                 version: this.getAppVersion(deviceId, this.packageInfo.packageName),
                 buildNum: this.getAppBuildVersion(deviceId, this.packageInfo.packageName)
               },
-              performanceData: this.performanceData.data,
+              perfDetailFile: jsonFile,
+              perfId: perfId,
+              overviewData: overviewData,
               author: this.$store.getters.userInfo.name,
               startTime: this.performanceData.startTime,
-              endTime: this.performanceData.endTime
+              endTime: this.performanceData.endTime,
+              createTime: parseCurrentTime()
             }
-            uploadPerformanceInfo(data).then(res => {
-              if (res.code === 200) {
-                this.$message.success('上传成功')
-                this.$emit('success')
-              }
-            }).catch(e => {
-              console.error('上传失败, error=', e)
-              this.$message.error('上传失败, error=' + e)
-            }).finally(() => {
-              this.uploading = false
-            })
+            writeJSONSync(jsonFile, this.performanceData.data)
+            this.$db.get(this.platform.toLowerCase()).push(data).write()
+            this.uploading = false
+            this.$emit('success')
           } else {
             return false
           }
         })
+      },
+      computeOverView(data, category, target) {
+        const detail = data[category].detail[target]
+        let sum = 0
+        let max = detail.data[0].value
+        detail.data.forEach(item => {
+          max = item.value > max ? item.value : max
+          sum += item.value
+        })
+        const avg = sum / detail.data.length
+        return {
+          unit: detail.unit,
+          avg: avg,
+          max: max,
+          key: target
+        }
       },
       afterOpen() {
         if (this.performanceData && this.performanceData.data) {
