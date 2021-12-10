@@ -41,7 +41,6 @@
           <el-input type="textarea" maxlength="255" show-word-limit :autosize="{ minRows: 3, maxRows: 6}" v-model="uploadForm.description" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitUpload">立即上传</el-button>
           <el-button type="success" @click="saveToLocal">保存本地</el-button>
         </el-form-item>
       </el-form>
@@ -50,11 +49,10 @@
 </template>
 
 <script>
-  import { uploadPerformanceInfo } from '@/api/poseidon'
   import { getAppVersion as androidVersion, getAppBuildVersion as androidBuildVersion } from '@/utils/AndroidUtil'
   import { formatElapsedTime, isNumber, parseCurrentTime } from '@/utils'
   import { getHashCode } from '@/utils/StringUtil'
-  import { writeJsonSync } from 'fs-extra'
+  import { writeJSONSync } from 'fs-extra'
 
   export default {
     name: 'UploadView',
@@ -142,52 +140,6 @@
       getAppBuildVersion(deviceId, packageName) {
         return this.platform === 'Android' ? androidBuildVersion(deviceId, packageName) : this.packageInfo.buildNum
       },
-      submitUpload() {
-        this.$refs.uploadForm.validate((valid) => {
-          if (valid) {
-            this.uploading = true
-            const deviceId = this.deviceInfo.UDID
-            const data = {
-              platform: this.platform.toLowerCase(),
-              title: this.uploadForm.title.trim(),
-              description: this.uploadForm.description,
-              deviceId: deviceId,
-              deviceInfo: {
-                devices: [{
-                  devicePlatform: this.platform.toLowerCase(),
-                  deviceName: this.deviceInfo.DeviceName,
-                  udid: deviceId,
-                  osVersion: this.deviceInfo.OSVersion
-                }]
-              },
-              packageName: this.packageInfo.packageName,
-              packageInfo: {
-                applicationName: this.packageInfo.name,
-                packageName: this.packageInfo.packageName,
-                version: this.getAppVersion(deviceId, this.packageInfo.packageName),
-                buildNum: this.getAppBuildVersion(deviceId, this.packageInfo.packageName)
-              },
-              performanceData: this.performanceData.data,
-              author: this.$store.getters.userInfo.name,
-              startTime: this.performanceData.startTime,
-              endTime: this.performanceData.endTime
-            }
-            uploadPerformanceInfo(data).then(res => {
-              if (res.code === 200) {
-                this.$message.success('上传成功')
-                this.$emit('success')
-              }
-            }).catch(e => {
-              console.error('上传失败, error=', e)
-              this.$message.error('上传失败, error=' + e)
-            }).finally(() => {
-              this.uploading = false
-            })
-          } else {
-            return false
-          }
-        })
-      },
       saveToLocal() {
         this.$refs.uploadForm.validate((valid) => {
           if (valid) {
@@ -229,7 +181,7 @@
               endTime: this.performanceData.endTime,
               createTime: parseCurrentTime()
             }
-            writeJsonSync(jsonFile, this.performanceData.data)
+            writeJSONSync(jsonFile, this.performanceData.data)
             this.$db.get(this.platform.toLowerCase()).push(data).write()
             this.uploading = false
             this.$emit('success')

@@ -13,7 +13,7 @@ import store from './store'
 import '@/icons' // icon
 import '@/permission' // permission control
 import cmdPlugin from './utils/CmdPlugins'
-import db from '../main/datastore'
+import db from './utils/datastore'
 import { remote } from 'electron'
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))

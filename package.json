@@ -1,5 +1,5 @@
 {
-  "name": "perf-fish",
+  "name": "perfish",
   "version": "1.1.5",
   "author": "蔡伟琪 <caiweiqi@lizhi.fm>",
   "description": "移动端性能测试工具",
@@ -20,7 +20,7 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "PerfFish",
+    "productName": "Perfish",
     "appId": "fm.lizhi.testing.perfish",
     "directories": {
       "output": "build"
